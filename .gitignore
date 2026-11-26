@@ -1,0 +1,25 @@
+# Python environment and caches
+.venv/
+__pycache__/
+*.pyc
+
+# Database, backups and collected static files. Member data never goes in git.
+data/
+*.sqlite3
+*.sqlite3-journal
+backups/
+
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+
+# Real member imports. Only the fake sample CSV is committed.
+imports/*.csv
+
+# Editor / OS clutter
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

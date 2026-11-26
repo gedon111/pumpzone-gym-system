@@ -1,0 +1,9 @@
+{# Placeholder. Replaced with the real dashboard in Step 4. #}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Pumpzone</title></head>
+<body>
+  <p>Signed in as {{ request.user.username }}. Dashboard coming in Step 4.</p>
+  <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button>Sign out</button></form>
+</body>
+</html>
