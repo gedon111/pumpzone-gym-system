@@ -1,0 +1,9 @@
+full_name,nickname,phone,plan_name,start_date,end_date,amount_paid,method,reference_no,notes
+Sample Person One,Uno,0900 000 9001,Monthly,2026-11-20,,1000,cash,,
+Sample Person Two,,0900 000 9002,Student Monthly,15/11/2026,,800,gcash,5501 234 567,
+Sample Person Three,Tres,0900 000 9003,3 Months,2026-10-01,,2700,cash,,Prefers morning sessions
+Sample Person Four,,0900 000 9004,Monthly,2026-11-01,,500,cash,,Paid half
+Sample Person Five,Singko,0900 000 9005,Monthly,2026-10-28,,0,,,Will pay Friday
+Sample Person Six,,0900 000 9006,Monthly,2026-11-25,2026-12-31,"1,000",cash,,Promo: extra days
+Sample Person Seven,Siete,,Monthly,2026-11-10,,1000,cash,,No phone on record
+Sample Person Eight,,0900 000 9008,Student Monthly,2026-11-24,,800,gcash,7710 998 120,
