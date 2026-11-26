@@ -40,7 +40,25 @@ To use it from the front-desk phone on the same Wi-Fi, run it with `runserver 0.
 
 ## 3. Seed demo data
 
-*(Added in Step 2.)*
+Fills the database with 223 **fake** members (phones all start `0900 000`), their payments, and three demo sign-ins. It only runs when DEBUG is on, so it can't wipe a live gym.
+
+```powershell
+.venv\Scripts\python.exe manage.py seed_demo
+```
+
+To wipe the gym data and start fresh:
+
+```powershell
+.venv\Scripts\python.exe manage.py seed_demo --reset
+```
+
+Demo sign-ins (local demo only, never use on a real server):
+
+| Username | Role | Password |
+|---|---|---|
+| `owner` | Owner: can open `/admin/` and void payments | `pumpzone-demo` |
+| `lea` | Front desk staff | `pumpzone-demo` |
+| `rico` | Front desk staff | `pumpzone-demo` |
 
 ## 4. Back up the database
 
