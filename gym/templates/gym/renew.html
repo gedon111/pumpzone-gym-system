@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}Renew {{ member.full_name }}{% endblock %}
+{% block content %}
+<section class="panel panel-pad narrow center">
+  <a class="back" href="{% url 'member_detail' member.pk %}">← {{ member.full_name }}</a>
+  <div>
+    <span class="eyebrow mono">{{ member.member_code }}</span>
+    <h1 class="page-title">Renew {{ member.nickname|default:member.full_name }}</h1>
+  </div>
+  <p class="caption">
+    {% if s.latest %}Current: {{ s.latest.plan.name }}, last day {{ s.latest.end_date|date:"j M Y" }} ({{ s.status_note|lower }}).
+    The new period starts {% if s.status == "expired" %}today{% else %}the day after{% endif %}, so no paid days are lost.{% endif %}
+    {% if s.is_owing %}<br><strong>Still owes {{ s.balance|peso }}</strong> from before.{% endif %}
+  </p>
+  <form class="form" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% include "gym/_plan_and_payment.html" %}
+    <button class="pz-btn pz-go pz-wide" type="submit">{% icon "refresh" %}Renew</button>
+  </form>
+</section>
+{% endblock %}

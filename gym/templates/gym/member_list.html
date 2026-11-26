@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}Members{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="stack tight">
+    <span class="eyebrow">{% if q %}Search: “{{ q }}”{% else %}Everyone on file{% endif %}</span>
+    <h1 class="page-title">Members <span class="mono muted count">{{ rows|length }}</span></h1>
+  </div>
+  <div class="actions">
+    <a class="pz-btn pz-ghost" href="{% url 'walk_in' %}">{% icon "cash" %}Walk-in</a>
+    <a class="pz-btn pz-go" href="{% url 'member_add' %}">{% icon "plus" %}Add member</a>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="panel-head">
+    <form class="search list-search" method="get" role="search">
+      <label class="pz-sr" for="list-search">Search members</label>
+      {% icon "search" %}
+      <input id="list-search" class="pz-input" type="search" name="q" value="{{ q }}" placeholder="Name, nickname, phone or code" {% if not q %}autofocus{% endif %}>
+      {% if wanted %}<input type="hidden" name="status" value="{{ wanted }}">{% endif %}
+    </form>
+    <nav class="tabs" aria-label="Filter by status">
+      {% for key, label in filters %}
+      <a class="pz-tab {% if key == wanted %}on{% endif %}" href="?{% if q %}q={{ q|urlencode }}&{% endif %}status={{ key }}">{{ label }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+  {% for s in rows %}
+    {% include "gym/_member_row.html" %}
+  {% empty %}
+    <p class="empty">No members match. <a href="{% url 'member_add' %}">Add a new member</a>.</p>
+  {% endfor %}
+</section>
+{% endblock %}

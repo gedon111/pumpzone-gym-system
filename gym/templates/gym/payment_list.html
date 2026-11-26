@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}Payments{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="stack tight">
+    <span class="eyebrow">{% if is_today %}Today · {% endif %}{{ day|date:"l, j F Y" }}</span>
+    <h1 class="page-title">Payments</h1>
+  </div>
+  <div class="actions">
+    <a class="pz-tab" href="?day={{ prev_day|date:'Y-m-d' }}">← {{ prev_day|date:"j M" }}</a>
+    {% if next_day %}<a class="pz-tab" href="?day={{ next_day|date:'Y-m-d' }}">{{ next_day|date:"j M" }} →</a>{% endif %}
+    <a class="pz-btn pz-go" href="{% url 'walk_in' %}">{% icon "plus" %}Walk-in day pass</a>
+  </div>
+</div>
+
+<section class="panel panel-pad">
+  <div class="between"><h2 class="h3">Total {% if is_today %}so far{% endif %}</h2><span class="mono muted small">voided payments not counted</span></div>
+  <span class="big-money">{{ total|peso }}</span>
+  <div class="split">
+    {% for t in totals %}<div class="split-cell"><span class="eyebrow">{{ t.label }}</span><span class="mono">{{ t.amount|peso }}</span></div>{% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2 class="h2">{{ payments|length }} payment{{ payments|length|pluralize }}</h2></div>
+  {% include "gym/_payment_table.html" with payments=payments %}
+</section>
+{% endblock %}

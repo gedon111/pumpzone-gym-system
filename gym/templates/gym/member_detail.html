@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}{{ member.full_name }}{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'member_list' %}">← All members</a>
+
+{# ---- Who, status, main buttons ---- #}
+<section class="pz-hero hero-compact">
+  <div class="pz-sheen" aria-hidden="true"></div>
+  <div class="pz-speck" aria-hidden="true"></div>
+  <div class="pz-grain" aria-hidden="true"></div>
+  <div class="pz-floor" aria-hidden="true"></div>
+  <div class="hero-copy">
+    <span class="eyebrow mono">{{ member.member_code }}{% if member.age %} · {{ member.age }} yrs{% endif %}</span>
+    <h1 class="page-title">{{ member.full_name }}{% if member.nickname %} <span class="muted">“{{ member.nickname }}”</span>{% endif %}</h1>
+    <div class="row-chip fixed">
+      <span class="pz-chip k-{{ s.status }}">{{ s.status_note }}</span>
+      {% if s.flag %}<span class="pz-chip k-unpaid">{% icon "alert" 14 %}{{ s.flag_note }} · {{ s.balance|peso }} due</span>{% endif %}
+    </div>
+    <div class="actions">
+      <a class="pz-btn pz-go" href="{% url 'member_renew' member.pk %}">{% icon "refresh" %}Renew</a>
+      <a class="pz-btn pz-ghost" href="{% url 'payment_add' member.pk %}">{% icon "cash" %}{% if s.is_owing %}Collect {{ s.balance|peso }}{% else %}Log payment{% endif %}</a>
+    </div>
+  </div>
+  <div class="glass hero-side">
+    <span class="eyebrow">Current period</span>
+    {% if s.latest %}
+      <span class="big-money date-big">{{ s.latest.end_date|date:"j M Y" }}</span>
+      <span class="caption">Last day of {{ s.latest.plan.name }} · started {{ s.latest.start_date|date:"j M" }}</span>
+    {% else %}
+      <span class="caption">No membership yet.</span>
+    {% endif %}
+  </div>
+</section>
+
+<div class="layout">
+  <div class="layout-main stack">
+    {# ---- Membership history ---- #}
+    <section class="panel">
+      <div class="panel-head"><h2 class="h2">Memberships</h2></div>
+      <div class="scroll-x">
+        <table class="pz-t">
+          <thead><tr><th>Plan</th><th>From</th><th>Last day</th><th class="r">Price</th><th class="r">Paid</th><th class="r">Owes</th><th>Sold by</th></tr></thead>
+          <tbody>
+          {% for m in memberships %}
+            <tr>
+              <td>{{ m.plan.name }}</td>
+              <td class="n">{{ m.start_date|date:"j M Y" }}</td>
+              <td class="n">{{ m.end_date|date:"j M Y" }}</td>
+              <td class="n r">{{ m.price_agreed|peso }}{% if m.discount > 0 %} <span class="muted" title="Normal price {{ m.list_price|peso }}">(−{{ m.discount|peso }})</span>{% endif %}</td>
+              <td class="n r">{{ m.amount_paid|peso }}</td>
+              <td class="n r">{% if m.balance > 0 %}{{ m.balance|peso }}{% else %}–{% endif %}</td>
+              <td>{% if m.created_by %}{{ m.created_by.first_name|default:m.created_by.username }}{% else %}–{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7" class="muted">No memberships yet.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {# ---- Payments ---- #}
+    <section class="panel">
+      <div class="panel-head"><h2 class="h2">Payments</h2></div>
+      {% include "gym/_payment_table.html" with payments=payments %}
+    </section>
+  </div>
+
+  {# ---- Contact and notes ---- #}
+  <aside class="layout-side">
+    <section class="panel panel-pad">
+      <div class="between"><h2 class="h3">Details</h2><a class="pz-btn pz-ghost pz-small" href="{% url 'member_edit' member.pk %}">Edit</a></div>
+      <div class="facts">
+        <div class="fact"><span class="eyebrow">Phone</span><span class="mono">{{ member.phone|default:"–" }}</span></div>
+        <div class="fact"><span class="eyebrow">Joined</span><span class="mono">{{ member.joined_on|date:"j M Y" }}</span></div>
+        <div class="fact"><span class="eyebrow">Emergency</span><strong>{{ member.emergency_contact_name|default:"–" }}</strong><span class="mono">{{ member.emergency_contact_phone }}</span></div>
+        <div class="fact"><span class="eyebrow">Consent</span><span class="mono">{{ member.consent_given_on|date:"j M Y"|default:"Not recorded" }}</span></div>
+      </div>
+      {% if member.notes %}<p class="caption">{{ member.notes|linebreaksbr }}</p>{% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

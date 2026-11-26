@@ -46,7 +46,7 @@ class Plan(TimeStamped):
     is_active = models.BooleanField(default=True, help_text="Untick to hide an old price without deleting history.")
 
     class Meta:
-        ordering = ["unit", "length", "name"]
+        ordering = ["-unit", "length", "name"]  # month plans first, day passes last
 
     def __str__(self):
         return self.name
@@ -64,7 +64,7 @@ class Member(TimeStamped):
     full_name = models.CharField(max_length=120)
     nickname = models.CharField(max_length=60, blank=True, help_text="Name used in the logbook.")
     phone = models.CharField(max_length=20, blank=True, db_index=True)
-    birth_date = models.DateField(null=True, blank=True, help_text="Optional. Only used to show age.")
+    birth_date = models.DateField(null=True, blank=True, help_text="Only used to show age.")
     emergency_contact_name = models.CharField(max_length=120, blank=True)
     emergency_contact_phone = models.CharField(max_length=20, blank=True)
     joined_on = models.DateField(default=today)

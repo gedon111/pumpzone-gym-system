@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+{# Used for both Add member (with plan + payment) and Edit details. #}
+<section class="panel panel-pad narrow center">
+  <a class="back" href="{% if member %}{% url 'member_detail' member.pk %}{% else %}{% url 'member_list' %}{% endif %}">← Back</a>
+  <h1 class="page-title">{{ title }}</h1>
+  <form class="form" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% if form.pay %}
+      {# Add member: who, then plan, then payment, then consent. #}
+      <div class="form-grid">
+        {% include "gym/_field.html" with f=form.full_name %}
+        {% include "gym/_field.html" with f=form.nickname %}
+        {% include "gym/_field.html" with f=form.phone %}
+        {% include "gym/_field.html" with f=form.birth_date %}
+      </div>
+      {% include "gym/_plan_and_payment.html" %}
+      <div class="form-section">{% include "gym/_field.html" with f=form.consent %}</div>
+    {% else %}
+      <div class="form-grid">{% for f in form %}{% include "gym/_field.html" %}{% endfor %}</div>
+    {% endif %}
+    <button class="pz-btn pz-go pz-wide" type="submit">{{ submit }}</button>
+  </form>
+</section>
+{% endblock %}

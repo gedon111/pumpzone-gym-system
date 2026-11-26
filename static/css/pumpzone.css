@@ -76,6 +76,12 @@ a:hover { color: #a6f0c4; }
 .count { font-weight: 600; font-size: 13px; }
 .small { font-size: 12px; }
 p.caption, p.help { margin: 0; }
+.tight { gap: 6px; }
+.center { align-self: center; }
+.hero-compact { min-height: 0; }
+.date-big { font-size: 36px; }
+.row-chip.fixed { flex: none; }
+.list-search { flex: 1 1 260px; }
 .narrow { max-width: 720px; width: 100%; }
 .pz-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }

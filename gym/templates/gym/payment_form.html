@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+{# Used for Collect from a member and for a walk-in day pass. #}
+<section class="panel panel-pad narrow center">
+  <a class="back" href="{% if member %}{% url 'member_detail' member.pk %}{% else %}{% url 'payment_list' %}{% endif %}">← Back</a>
+  <h1 class="page-title">{{ title }}</h1>
+  {% if no_membership %}
+    <p class="caption">{{ member.full_name }} has no membership to pay for yet. <a href="{% url 'member_renew' member.pk %}">Sell one first</a>.</p>
+  {% else %}
+  {% if member %}<p class="caption">{% if member.balance > 0 %}Owes {{ member.balance|peso }} in total.{% else %}Nothing owed right now.{% endif %}</p>
+  {% else %}<p class="caption">For someone who is not a member. Valid today only.</p>{% endif %}
+  <form class="form" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for f in form %}{% include "gym/_field.html" %}{% endfor %}
+    <button class="pz-btn pz-go pz-wide" type="submit">{% icon "check" %}Save payment</button>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

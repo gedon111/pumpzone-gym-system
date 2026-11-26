@@ -1,0 +1,16 @@
+{# Plan + payment part of the Add member and Renew forms. #}
+<div class="form-section">
+  <div class="form-grid">
+    {% include "gym/_field.html" with f=form.plan %}
+    {% include "gym/_field.html" with f=form.start_date %}
+    {% include "gym/_field.html" with f=form.price_agreed %}
+  </div>
+</div>
+<div class="form-section">
+  {% include "gym/_field.html" with f=form.pay %}
+  {% include "gym/_field.html" with f=form.method %}
+  <div class="form-grid">
+    {% include "gym/_field.html" with f=form.amount %}
+    {% include "gym/_field.html" with f=form.reference_no %}
+  </div>
+</div>
