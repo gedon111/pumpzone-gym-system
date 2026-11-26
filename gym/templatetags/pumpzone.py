@@ -4,6 +4,7 @@ Small helpers used inside templates. Load with {% load pumpzone %}.
     {{ amount|peso }}         -> ₱1,000
     {{ "Marco Cruz"|initials }} -> MC
     {% icon "refresh" %}       -> an inline SVG line icon (same set as the mockup)
+    {{ summary|sms_link }}     -> sms: link with a pre-filled reminder (see gym/sms.py)
 """
 
 from decimal import Decimal
@@ -11,6 +12,8 @@ from decimal import Decimal
 from django import template
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+
+from gym.sms import sms_link_for
 
 register = template.Library()
 
@@ -23,6 +26,11 @@ def peso(value):
     value = Decimal(value)
     text = f"{value:,.0f}" if value == value.to_integral() else f"{value:,.2f}"
     return f"₱{text}"
+
+
+@register.filter
+def sms_link(summary):
+    return sms_link_for(summary)
 
 
 @register.filter

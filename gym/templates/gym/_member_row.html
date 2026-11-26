@@ -19,6 +19,7 @@
   </div>
   <div class="row-bal">{% if s.balance > 0 %}{{ s.balance|peso }} due{% else %}Paid{% endif %}</div>
   <div class="row-actions">
+    {% with href=s|sms_link %}{% if href %}<a class="pz-btn pz-ghost pz-small" href="{{ href }}" title="Opens your SMS app with a reminder">{% icon "message" 16 %}Text</a>{% endif %}{% endwith %}
     {% if s.is_owing %}<a class="pz-btn pz-ghost pz-small" href="{% url 'payment_add' s.member.pk %}">Collect</a>{% endif %}
     {% if s.can_renew %}<a class="pz-btn pz-go pz-small" href="{% url 'member_renew' s.member.pk %}">Renew</a>{% endif %}
   </div>

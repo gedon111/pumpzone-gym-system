@@ -20,6 +20,7 @@
     <div class="actions">
       <a class="pz-btn pz-go" href="{% url 'member_renew' member.pk %}">{% icon "refresh" %}Renew</a>
       <a class="pz-btn pz-ghost" href="{% url 'payment_add' member.pk %}">{% icon "cash" %}{% if s.is_owing %}Collect {{ s.balance|peso }}{% else %}Log payment{% endif %}</a>
+      {% with href=s|sms_link %}{% if href %}<a class="pz-btn pz-ghost" href="{{ href }}">{% icon "message" %}Message member</a>{% endif %}{% endwith %}
     </div>
   </div>
   <div class="glass hero-side">
