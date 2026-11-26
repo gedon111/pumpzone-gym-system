@@ -13,7 +13,7 @@ backups/
 .env
 .env.*
 !.env.example
-.claude/settings.local.json
+.claude/
 
 # Real member imports. Only the fake sample CSV is committed.
 imports/*.csv

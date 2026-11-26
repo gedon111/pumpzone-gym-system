@@ -17,4 +17,4 @@ class LoginRequiredTests(TestCase):
         self.client.force_login(staff)
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Signed in as lea")
+        self.assertContains(response, "PUMPZONE")

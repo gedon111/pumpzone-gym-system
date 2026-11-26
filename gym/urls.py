@@ -2,8 +2,10 @@
 
 from django.urls import path
 
-from . import views
+from .views import dashboard, members, payments
 
 urlpatterns = [
-    path("", views.dashboard, name="dashboard"),
+    path("", dashboard.dashboard, name="dashboard"),
+    path("members/", members.member_list, name="member_list"),
+    path("payments/", payments.payment_list, name="payment_list"),
 ]

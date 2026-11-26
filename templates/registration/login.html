@@ -1,15 +1,34 @@
-{# Temporary login page. Gets the Pumpzone design in Step 3. #}
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="utf-8"><title>Sign in · Pumpzone</title></head>
-<body>
-  <h1>Pumpzone sign in</h1>
-  {% if form.errors %}<p>Wrong username or password.</p>{% endif %}
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="hidden" name="next" value="{{ next }}">
-    <button type="submit">Sign in</button>
-  </form>
-</body>
-</html>
+{% extends "base.html" %}
+{# Sign-in page: the hero card on its own, centred. #}
+{% block title %}Sign in{% endblock %}
+{% block page %}
+<div class="login">
+  <section class="pz-hero" aria-labelledby="login-title">
+    <div class="pz-sheen" aria-hidden="true"></div>
+    <div class="pz-speck" aria-hidden="true"></div>
+    <div class="pz-grain" aria-hidden="true"></div>
+    <div class="pz-floor" aria-hidden="true"></div>
+
+    <div class="login-copy">
+      <span class="brand-name">PUMPZONE</span>
+      <h1 id="login-title" class="hero-title">Front desk sign in</h1>
+      <p class="hero-text">Use your own account so every payment shows who took it.</p>
+    </div>
+
+    <form class="form glass" method="post">
+      {% csrf_token %}
+      {% if form.errors %}<div class="flash error" role="alert">Wrong username or password. Try again.</div>{% endif %}
+      <div class="field">
+        <label for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" autocomplete="username" autocapitalize="none" required autofocus value="{{ form.username.value|default:'' }}">
+      </div>
+      <div class="field">
+        <label for="id_password">Password</label>
+        <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="pz-btn pz-go pz-wide" type="submit">Sign in</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

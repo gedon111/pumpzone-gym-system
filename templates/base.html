@@ -1,0 +1,56 @@
+{% load static pumpzone %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d0c10">
+  <title>{% block title %}Pumpzone{% endblock %} · Pumpzone desk</title>
+  <link rel="preload" href="{% static 'fonts/inter-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/archivo-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/pumpzone.css' %}">
+</head>
+<body>
+<div class="pz-page">
+{% block page %}
+<div class="wrap">
+  {# ---- Header: brand, nav, search, who is signed in ---- #}
+  <header class="pz-header">
+    <a class="brand" href="{% url 'dashboard' %}">
+      <span class="brand-name">PUMPZONE</span>
+      <span class="brand-sub">membership desk</span>
+    </a>
+    <nav class="pz-nav" aria-label="Main">
+      {% with here=request.resolver_match.url_name %}
+      <a href="{% url 'dashboard' %}" {% if here == 'dashboard' %}class="on" aria-current="page"{% endif %}>Dashboard</a>
+      <a href="{% url 'member_list' %}" {% if here == 'member_list' or here == 'member_detail' %}class="on" aria-current="page"{% endif %}>Members</a>
+      <a href="{% url 'payment_list' %}" {% if here == 'payment_list' %}class="on" aria-current="page"{% endif %}>Payments</a>
+      {% if request.user.is_staff %}<a href="{% url 'admin:index' %}">Admin</a>{% endif %}
+      {% endwith %}
+    </nav>
+    <form class="search" method="get" action="{% url 'member_list' %}" role="search">
+      <label class="pz-sr" for="pz-search">Search members</label>
+      {% icon "search" %}
+      <input id="pz-search" class="pz-input" type="search" name="q" value="{{ request.GET.q }}" placeholder="Search name, nickname, phone or code">
+    </form>
+    <div class="who">
+      {% if settings_debug %}<span class="badge-sample" title="DEBUG is on. Use only fake data.">Sample data</span>{% endif %}
+      <span class="avatar" title="Signed in as {{ request.user.get_full_name|default:request.user.username }}">{{ request.user.get_full_name|default:request.user.username|slice:":2" }}</span>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="pz-btn pz-ghost pz-small" type="submit">Sign out</button></form>
+    </div>
+  </header>
+
+  {% for message in messages %}
+    <div class="flash {% if message.tags == 'error' %}error{% endif %}" role="status">{{ message }}</div>
+  {% endfor %}
+
+  <main class="stack">{% block content %}{% endblock %}</main>
+
+  <footer class="footer caption">
+    <span>{% if settings_debug %}Local prototype. All names and numbers are sample data.{% else %}Pumpzone membership desk{% endif %}</span>
+    <span class="mono">{% now "D j M Y · H:i" %}</span>
+  </footer>
+</div>
+{% endblock %}
+</div>
+</body>
+</html>
