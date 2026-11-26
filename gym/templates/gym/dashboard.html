@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+{# ---- Hero: headline + every member as a square ---- #}
+<section class="pz-hero" aria-labelledby="pz-headline">
+  <div class="pz-sheen" aria-hidden="true"></div>
+  <div class="pz-speck" aria-hidden="true"></div>
+  <div class="pz-grain" aria-hidden="true"></div>
+  <div class="pz-floor" aria-hidden="true"></div>
+
+  <div class="hero-copy">
+    <span class="eyebrow">{{ today|date:"l, j F" }} · Front desk</span>
+    <h1 id="pz-headline" class="hero-title">
+      {% if expiring_count %}{{ expiring_count }} membership{{ expiring_count|pluralize }} run{{ expiring_count|pluralize:"s," }} out this week.{% else %}No memberships run out this week.{% endif %}
+    </h1>
+    <p class="hero-text">
+      Renew them at the counter before they lapse.
+      {% if owing_count %}{{ owing_count }} member{{ owing_count|pluralize }} also still owe{{ owing_count|pluralize:"s," }} money.{% endif %}
+    </p>
+    <div class="actions">
+      <a class="pz-btn pz-go" href="?show=expiring#action">{% icon "refresh" %}Start renewals</a>
+      <a class="pz-btn pz-ghost" href="{% url 'member_list' %}">{% icon "plus" %}Add member</a>
+    </div>
+  </div>
+
+  <div class="glass hero-side">
+    <div class="between">
+      <span class="eyebrow">Every square is a member</span>
+      <span class="mono count">{{ summaries_count }} on file</span>
+    </div>
+    <div class="dot-grid" role="img"
+         aria-label="{{ summaries_count }} members: {{ by_status.active }} active, {{ by_status.expiring }} expiring within 7 days, {{ by_status.expired }} expired">
+      {% for c in dots %}<i class="m {{ c }}"></i>{% endfor %}
+    </div>
+    <div class="legend">
+      <span><i class="m c-act"></i>Active {{ by_status.active }}</span>
+      <span><i class="m c-soon"></i>Expiring {{ by_status.expiring }}</span>
+      <span><i class="m c-out"></i>Expired {{ by_status.expired }}</span>
+      {% if by_status.none %}<span><i class="m c-none"></i>No plan {{ by_status.none }}</span>{% endif %}
+    </div>
+  </div>
+</section>
+
+{# ---- Count tiles (tap to filter) ---- #}
+<section class="tiles" aria-label="Membership counts">
+  {% for t in tiles %}
+  <a class="pz-tile {% if t.key == show %}on{% endif %}" href="{{ t.href }}">
+    <span class="tile-top"><span class="tile-label">{{ t.label }}</span><span class="m big {{ t.dot }}"></span></span>
+    <span class="tile-value">{{ t.value }}</span>
+    <span class="tile-sub">{{ t.sub }}</span>
+  </a>
+  {% endfor %}
+</section>
+
+<div class="layout">
+  {# ---- Action list ---- #}
+  <section id="action" class="panel layout-main" aria-labelledby="pz-action">
+    <div class="panel-head">
+      <div>
+        <h2 id="pz-action" class="h2">Needs action today</h2>
+        <span class="caption">{{ caption }}</span>
+      </div>
+      <nav class="tabs" aria-label="Filter members">
+        {% for tab in tabs %}
+        <a class="pz-tab {% if tab.key == show %}on{% endif %}" href="?show={{ tab.key }}#action" {% if tab.key == show %}aria-current="true"{% endif %}>{{ tab.label }}<span class="mono">{{ tab.count }}</span></a>
+        {% endfor %}
+      </nav>
+    </div>
+    {% for s in rows %}
+      {% include "gym/_member_row.html" %}
+    {% empty %}
+      <p class="empty">Nobody here. Nice.</p>
+    {% endfor %}
+  </section>
+
+  <aside class="layout-side">
+    {# ---- Money collected today ---- #}
+    <section class="panel panel-pad" aria-labelledby="pz-cash">
+      <div class="between">
+        <h2 id="pz-cash" class="h3">Collected today</h2>
+        <span class="mono muted small">{{ collected.count }} payment{{ collected.count|pluralize }}</span>
+      </div>
+      <span class="big-money">{{ collected.total|peso }}</span>
+      {% if collected.total %}
+      <div class="split-bar" role="img" aria-label="{% for m in collected.methods %}{{ m.label }} {{ m.amount|peso }}, {{ m.share }} percent. {% endfor %}">
+        {% for m in collected.methods %}{% if m.amount %}<span class="sw-{{ m.key }}" style="flex:{{ m.share }}"></span>{% endif %}{% endfor %}
+      </div>
+      {% endif %}
+      <div class="split">
+        {% for m in collected.methods %}
+        <div class="split-cell">
+          <span class="eyebrow"><i class="sw-{{ m.key }}"></i>{{ m.label }} · {{ m.count }}</span>
+          <span class="mono">{{ m.amount|peso }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="caption">Check the cash total against the drawer before closing.</p>
+    </section>
+
+    {# ---- 4-week expiry calendar ---- #}
+    <section class="panel panel-pad" aria-labelledby="pz-radar">
+      <div>
+        <h2 id="pz-radar" class="h3">Expiry radar</h2>
+        <span class="caption">Memberships ending each day, next 4 weeks</span>
+      </div>
+      <div class="cal">
+        {% for w in weekdays %}<span class="cal-head">{{ w }}</span>{% endfor %}
+        {% for d in calendar %}
+        <div class="d lv{{ d.level }} {% if d.is_today %}today{% endif %}" role="img"
+             aria-label="{{ d.date|date:'D j M' }}: {{ d.count }} membership{{ d.count|pluralize }} end{{ d.count|pluralize:'s,' }}">
+          <span>{{ d.date|date:"j" }}{% if d.date.day == 1 %} {{ d.date|date:"M" }}{% endif %}</span><b>{{ d.count }}</b>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="cal-key">
+        <span>Fewer</span><span class="d lv0"></span><span class="d lv1"></span><span class="d lv2"></span><span class="d lv3"></span><span>More</span>
+      </div>
+    </section>
+  </aside>
+</div>
+
+{# ---- Latest payments ---- #}
+<section class="panel" aria-labelledby="pz-pay">
+  <div class="panel-head">
+    <h2 id="pz-pay" class="h2">Latest payments</h2>
+    <a class="pz-btn pz-ghost pz-small" href="{% url 'payment_list' %}">{% icon "cash" 16 %}All payments</a>
+  </div>
+  {% include "gym/_payment_table.html" with payments=latest_payments %}
+</section>
+{% endblock %}

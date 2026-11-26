@@ -1,0 +1,25 @@
+{% load pumpzone %}
+{# One member row. Needs `s` = a MemberSummary (see gym/summary.py). #}
+<div class="pz-row">
+  <span class="initials" aria-hidden="true">{{ s.member.full_name|initials }}</span>
+  <div class="row-who">
+    <a class="row-name" href="{% url 'member_detail' s.member.pk %}">{{ s.member.full_name }}{% if s.member.nickname %} <span class="muted">“{{ s.member.nickname }}”</span>{% endif %}</a>
+    <span class="row-meta">{{ s.member.member_code }}{% if s.latest %} · {{ s.latest.plan.name }}{% endif %}</span>
+  </div>
+  <div class="row-ends">
+    <span class="eyebrow">Ends</span>
+    <span>{% if s.latest %}{{ s.latest.end_date|date:"j M" }}{% else %}–{% endif %}</span>
+  </div>
+  <div class="row-chip">
+    <span class="pz-chip k-{{ s.status }}">
+      {% if s.status == "expiring" %}{% icon "clock" 14 %}{% elif s.status == "expired" %}{% icon "x-circle" 14 %}{% endif %}
+      {{ s.status_note }}
+    </span>
+    {% if s.flag %}<span class="pz-chip k-unpaid">{% icon "alert" 14 %}{{ s.flag_note }}</span>{% endif %}
+  </div>
+  <div class="row-bal">{% if s.balance > 0 %}{{ s.balance|peso }} due{% else %}Paid{% endif %}</div>
+  <div class="row-actions">
+    {% if s.is_owing %}<a class="pz-btn pz-ghost pz-small" href="{% url 'payment_add' s.member.pk %}">Collect</a>{% endif %}
+    {% if s.can_renew %}<a class="pz-btn pz-go pz-small" href="{% url 'member_renew' s.member.pk %}">Renew</a>{% endif %}
+  </div>
+</div>

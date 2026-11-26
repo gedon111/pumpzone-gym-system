@@ -15,7 +15,6 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Sum
 from django.utils import timezone
 
 from . import dates, status
@@ -110,7 +109,9 @@ class Member(TimeStamped):
     @property
     def latest_membership(self):
         """The membership that ends last. Its end date decides the status."""
-        return self.memberships.order_by("-end_date", "-id").first()
+        # Uses .all() so it reuses data already loaded by summary.py (no extra query).
+        memberships = list(self.memberships.all())
+        return max(memberships, key=lambda m: (m.end_date, m.id), default=None)
 
     def expiry_status(self, on=None):
         latest = self.latest_membership
@@ -176,8 +177,8 @@ class Membership(TimeStamped):
 
     @property
     def amount_paid(self):
-        total = self.payments.filter(is_voided=False).aggregate(t=Sum("amount"))["t"]
-        return total or Decimal("0")
+        # Summed in Python so it reuses payments already loaded by summary.py.
+        return sum((p.amount for p in self.payments.all() if not p.is_voided), Decimal("0"))
 
     @property
     def balance(self):
