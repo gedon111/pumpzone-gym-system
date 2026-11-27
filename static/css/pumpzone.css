@@ -366,3 +366,12 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
   .gcash-panel { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .qr-frame { width: min(220px, 70vw); }
 }
+
+/* 16. Online demo copy (GitHub Pages only, added by gym/static_export.py) ---- */
+.demo-bar { position: sticky; top: 0; z-index: 50; padding: 10px 16px; text-align: center; font-size: 13px; line-height: 1.4;
+  color: var(--go-ink); background: var(--go); }
+.demo-dialog { max-width: min(420px, 90vw); padding: 22px; border-radius: 14px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); display: none; flex-direction: column; gap: 10px; }
+.demo-dialog[open] { display: flex; }
+.demo-dialog p { margin: 0; line-height: 1.5; }
+.demo-dialog::backdrop { background: rgba(0, 0, 0, .6); }

@@ -23,3 +23,6 @@ imports/*.csv
 .idea/
 Thumbs.db
 .DS_Store
+
+# Online demo build (made by `manage.py export_static`, published by GitHub Actions)
+_site/

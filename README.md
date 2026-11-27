@@ -173,13 +173,32 @@ Copy-Item data\backups\db-2026-11-26_151736.sqlite3 data\db.sqlite3
 
 Test a restore once before the gym relies on this. A backup you've never restored doesn't count.
 
+## 5b. Online demo (GitHub Pages)
+
+GitHub Pages can only host fixed files, so it can't run Django or the database. The online demo is a **read-only snapshot** of the real app with **fake data only**. You can click through every screen (dashboard, check-in results, members, payments, sign-ups and the forms), but Save shows a "demo only" message. The full app with its database still runs on your PC as in section 3.
+
+- **How it's built:** on every push to `main`, the GitHub workflow (`.github/workflows/pages.yml`) runs the tests, makes a throwaway database with `seed_demo`, saves every screen with `export_static`, and publishes it. Your own `data/` folder is never used or uploaded.
+- **One-time setup on GitHub:** in the repo, go to **Settings > Pages** and set **Source** to **GitHub Actions**. The site is then at `https://<your-username>.github.io/pumpzone-gym-system/`.
+- **To rebuild without a code change** (for example, so the demo's "today" is current before a pitch): **Actions > Online demo (GitHub Pages) > Run workflow**.
+- **To preview the snapshot locally** before pushing:
+
+```powershell
+.venv\Scripts\python.exe manage.py export_static _site
+```
+
+```powershell
+.venv\Scripts\python.exe -m http.server 8766 --directory _site
+```
+
+Then open http://localhost:8766. The export refuses to run unless every phone number is a fake `0900 000` one, so real members can't be published by mistake.
+
 ## 6. Run the tests
 
 ```powershell
 .venv\Scripts\python.exe manage.py test
 ```
 
-There are 100 tests. They cover the expiry and payment rules at every boundary day (the core of the product). They also cover the screens, check-in, sign-up mode and its lock, per-staff totals, the GCash QR, SMS text, import, seed and backups.
+There are 103 tests. They cover the expiry and payment rules at every boundary day (the core of the product). They also cover the screens, check-in, sign-up mode and its lock, per-staff totals, the GCash QR, SMS text, import, seed and backups.
 
 ---
 
@@ -232,7 +251,8 @@ Local development needs no settings. For a real server (or Docker later), set th
 | `gym/cashup.py`, `gym/qr.py` | Per-staff totals, and the GCash QR |
 | `gym/sms.py` | The SMS reminder text and link |
 | `gym/importer.py` | CSV import rules |
-| `gym/management/commands/` | `seed_demo`, `import_members`, `backup_db` |
+| `gym/management/commands/` | `seed_demo`, `import_members`, `backup_db`, `export_static` |
+| `gym/static_export.py`, `.github/workflows/pages.yml` | The online demo snapshot, and the GitHub workflow that publishes it |
 | `gym/templates/gym/`, `templates/` | HTML templates |
 | `static/css/pumpzone.css` | The Anti-Flat design system, ported from the mockup |
 | `static/fonts/` | Archivo, Inter and JetBrains Mono (OFL licensed, self-hosted) |
