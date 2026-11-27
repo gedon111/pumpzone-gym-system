@@ -51,7 +51,8 @@ class PaymentChoiceForm(forms.Form):
 class PlanChoiceForm(forms.Form):
     """Plan, start date and (optional) discounted price."""
 
-    plan = forms.ModelChoiceField(queryset=Plan.objects.none(), empty_label=None)
+    plan = forms.ModelChoiceField(queryset=Plan.objects.none(), empty_label=None,
+                                  help_text="Student prices: they show a student ID or come in school uniform.")
     start_date = forms.DateField(widget=DATE)
     price_agreed = forms.DecimalField(label="Price (if discounted)", required=False, min_value=0, widget=MONEY,
                                       help_text="Leave blank for the normal price. Your name is saved with any discount.")

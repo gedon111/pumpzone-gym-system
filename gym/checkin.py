@@ -2,10 +2,12 @@
 Check-in: find the member from a card tap or what staff type, log the
 visit, and say in one word whether they may train.
 
-NFC-ready without any driver or JavaScript: a USB NFC reader in "keyboard
-mode" (ACR122U class, or the cheap 13.56 MHz USB readers) types the card
+NFC-ready without any driver or JavaScript: a USB NFC reader that works
+as a keyboard ("keyboard emulation" / "HID", 13.56 MHz) types the card
 number and presses Enter, exactly as if staff had typed it. So the same
 box takes a card tap, a member code, a phone number or a nickname.
+(Readers like the ACR122U are NOT keyboard readers: they need a driver
+and extra software, so don't buy that kind for this.)
 """
 
 from dataclasses import dataclass
@@ -20,6 +22,9 @@ from .summary import MemberSummary, members_with_history, summarize
 
 # What the big result card says. tone = colour: go (green), soon (amber), out (red).
 GO, SOON, OUT = "go", "soon", "out"
+
+# Owner's rule for student prices (2026-11-27).
+STUDENT_CHECK = "Student rate: check their student ID or school uniform."
 
 
 @dataclass
@@ -61,6 +66,13 @@ def log(member, user, how) -> CheckIn:
 
 def verdict(s: MemberSummary):
     """(tone, headline, detail) for the big result card."""
+    tone, headline, detail = plain_verdict(s)
+    if s.latest and s.latest.plan.is_student and tone != OUT:
+        detail = f"{detail} {STUDENT_CHECK}"
+    return tone, headline, detail
+
+
+def plain_verdict(s: MemberSummary):
     end = s.latest.end_date if s.latest else None
     if s.status == status.EXPIRED:
         return OUT, "Expired", f"Ended {end:%d %b}. Renew before training."

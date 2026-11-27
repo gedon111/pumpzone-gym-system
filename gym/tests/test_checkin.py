@@ -97,3 +97,14 @@ class CheckInTests(TestCase):
         self.tap(m.member_code)
         self.assertEqual(self.client.get("/").context["checkins_today"], 1)
         self.assertEqual(len(self.client.get(f"/members/{m.pk}/").context["check_ins"]), 1)
+
+    def test_student_plan_reminds_staff_to_check_id_or_uniform(self):
+        student = Plan.objects.create(name="Student Monthly", price=Decimal("650"))
+        m = Member.objects.create(full_name="Bea Santos")
+        ms = Membership.objects.create(member=m, plan=student, start_date=self.today,
+                                       end_date=self.today + timedelta(days=20))
+        Payment.objects.create(membership=ms, amount=ms.price_agreed)
+        tone, _, detail = checkin.verdict(summarize(m, self.today))
+        self.assertEqual(tone, checkin.GO)
+        self.assertIn("student ID or school uniform", detail)
+        self.assertNotIn("student ID", checkin.verdict(summarize(self.member(), self.today))[2])

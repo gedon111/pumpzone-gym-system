@@ -57,6 +57,11 @@ class Plan(TimeStamped):
     def end_date_for(self, start):
         return dates.membership_end_date(start, self.unit, self.length)
 
+    @property
+    def is_student(self):
+        """Student rate. Owner's rule: show a student ID or come in school uniform."""
+        return self.name.lower().startswith("student")
+
 
 def clean_card_uid(value):
     """
