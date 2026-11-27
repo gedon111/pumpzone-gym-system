@@ -10,7 +10,7 @@ Rules enforced here:
 
 from django.contrib import admin
 
-from .models import Member, Membership, Payment, Plan, SignUp
+from .models import CheckIn, Member, Membership, Payment, Plan, SignUp
 from .roles import is_owner
 
 LOCKED_PAYMENT_FIELDS = ("membership", "walk_in_name", "walk_in_plan", "amount", "method", "reference_no", "paid_on")
@@ -33,7 +33,7 @@ class MembershipInline(admin.TabularInline):
 @admin.register(Member)
 class MemberAdmin(admin.ModelAdmin):
     list_display = ("member_code", "full_name", "nickname", "phone", "joined_on", "is_archived")
-    search_fields = ("member_code", "full_name", "nickname", "phone")
+    search_fields = ("member_code", "full_name", "nickname", "phone", "card_uid")
     list_filter = ("is_archived", "joined_on")
     readonly_fields = ("member_code",)
     inlines = [MembershipInline]
@@ -104,6 +104,21 @@ class SignUpAdmin(admin.ModelAdmin):
     list_display = ("created_at", "full_name", "phone", "says_existing", "status", "member", "handled_by")
     list_filter = ("status", "says_existing")
     search_fields = ("full_name", "nickname", "phone")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(CheckIn)
+class CheckInAdmin(admin.ModelAdmin):
+    """The visit log. Read-only: visits are recorded at the desk, never edited."""
+
+    list_display = ("at", "member", "how", "status_then", "by")
+    list_filter = ("how", "status_then", "at")
+    search_fields = ("member__full_name", "member__nickname", "member__member_code")
 
     def has_add_permission(self, request):
         return False

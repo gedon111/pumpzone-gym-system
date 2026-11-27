@@ -52,6 +52,7 @@ def member_detail(request, pk):
     payments.sort(key=lambda p: p.paid_on, reverse=True)
     return render(request, "gym/member_detail.html", {
         "s": summary, "member": member, "memberships": memberships, "payments": payments,
+        "check_ins": member.check_ins.all()[:10],
     })
 
 

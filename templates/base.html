@@ -22,6 +22,7 @@
     <nav class="pz-nav" aria-label="Main">
       {% with here=request.resolver_match.url_name %}
       <a href="{% url 'dashboard' %}" {% if here == 'dashboard' %}class="on" aria-current="page"{% endif %}>Dashboard</a>
+      <a href="{% url 'check_in' %}" {% if here == 'check_in' %}class="on" aria-current="page"{% endif %}>Check-in</a>
       <a href="{% url 'member_list' %}" {% if here == 'member_list' or here == 'member_detail' %}class="on" aria-current="page"{% endif %}>Members</a>
       <a href="{% url 'payment_list' %}" {% if here == 'payment_list' %}class="on" aria-current="page"{% endif %}>Payments</a>
       <a href="{% url 'signup_list' %}" {% if here == 'signup_list' or here == 'signup_review' %}class="on" aria-current="page"{% endif %}>Sign-ups{% if pending_signups %} <span class="nav-count mono">{{ pending_signups }}</span>{% endif %}</a>

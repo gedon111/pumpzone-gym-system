@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}Check-in{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="stack tight">
+    <span class="eyebrow">{% now "l, j F" %} · {{ count_today }} checked in today</span>
+    <h1 class="page-title">Check-in</h1>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="layout-main stack">
+    {# ---- The box: a USB NFC reader types the card number here and presses Enter ---- #}
+    <section class="panel panel-pad">
+      <form class="checkin-form" method="post" action="{% url 'check_in' %}">
+        {% csrf_token %}
+        <label class="pz-sr" for="checkin-code">Card, member code, phone or nickname</label>
+        <input id="checkin-code" class="checkin-input" type="text" name="code" value="{{ query }}" autofocus
+               autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="go"
+               placeholder="Tap card, or type code / phone / nickname">
+        <button class="pz-btn pz-go" type="submit">{% icon "check" %}Check in</button>
+      </form>
+      <p class="help">Card readers type the number and press Enter for you. Without a reader, type a member code like 2026-0001, a phone number, or a nickname.</p>
+    </section>
+
+    {% if result %}
+    {# ---- Big green / amber / red answer ---- #}
+    <section class="pz-hero verdict tone-{{ result.tone }}" aria-live="polite" aria-labelledby="verdict-title">
+      <div class="pz-sheen" aria-hidden="true"></div>
+      <div class="pz-speck" aria-hidden="true"></div>
+      <div class="pz-grain" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <span class="eyebrow mono">{{ result.visit.at|time:"H:i" }} · {{ result.visit.get_how_display }} · {{ result.s.member.member_code }}</span>
+        <h2 id="verdict-title" class="verdict-word">{{ result.headline }}</h2>
+        <p class="verdict-name">{{ result.s.member.nickname|default:result.s.member.full_name }}{% if result.s.member.nickname %} <span class="muted">{{ result.s.member.full_name }}</span>{% endif %}</p>
+        <p class="hero-text">{{ result.detail }}</p>
+        <div class="actions">
+          {% if result.s.can_renew %}<a class="pz-btn pz-go" href="{% url 'member_renew' result.s.member.pk %}">{% icon "refresh" %}Renew</a>{% endif %}
+          {% if result.s.is_owing %}<a class="pz-btn pz-ghost" href="{% url 'payment_add' result.s.member.pk %}">{% icon "cash" %}Collect {{ result.s.balance|peso }}</a>{% endif %}
+          <a class="pz-btn pz-ghost" href="{% url 'member_detail' result.s.member.pk %}">Open member</a>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if choices %}
+    <section class="panel">
+      <div class="panel-head"><div><h2 class="h3">Which one?</h2><span class="caption">{{ choices|length }} members match “{{ query }}”. Tap the right person.</span></div></div>
+      {% for m in choices %}
+      <form class="pz-row" method="post" action="{% url 'check_in' %}">
+        {% csrf_token %}
+        <input type="hidden" name="member" value="{{ m.pk }}">
+        <span class="initials" aria-hidden="true">{{ m.full_name|initials }}</span>
+        <div class="row-who">
+          <span class="row-name">{{ m.full_name }}{% if m.nickname %} <span class="muted">“{{ m.nickname }}”</span>{% endif %}</span>
+          <span class="row-meta">{{ m.member_code }} · {{ m.phone|default:"no phone" }}</span>
+        </div>
+        <div class="row-actions"><button class="pz-btn pz-go pz-small" type="submit">Check in</button></div>
+      </form>
+      {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if not_found %}
+    <section class="flash error" role="alert">
+      Nobody found for “{{ query }}”. If it's a new card, open the member and paste it into <strong>Card number</strong> in Edit details.
+      <a href="{% url 'member_list' %}">Find the member</a>
+    </section>
+    {% endif %}
+  </div>
+
+  {# ---- Today's visits (this replaces the logbook) ---- #}
+  <aside class="layout-side">
+    <section class="panel">
+      <div class="panel-head"><h2 class="h3">Today</h2><span class="mono muted">{{ count_today }}</span></div>
+      {% for v in recent %}
+      <div class="visit">
+        <span class="mono muted">{{ v.at|time:"H:i" }}</span>
+        <a href="{% url 'member_detail' v.member_id %}">{{ v.member.nickname|default:v.member.full_name }}</a>
+        <span class="pz-chip k-{{ v.status_then|default:'none' }}">{{ v.status_then|default:"–" }}</span>
+      </div>
+      {% empty %}
+      <p class="panel-pad caption">No check-ins yet today.</p>
+      {% endfor %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

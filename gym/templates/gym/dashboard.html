@@ -17,7 +17,7 @@
   <div class="pz-floor" aria-hidden="true"></div>
 
   <div class="hero-copy">
-    <span class="eyebrow">{{ today|date:"l, j F" }} · Front desk</span>
+    <span class="eyebrow">{{ today|date:"l, j F" }} · Front desk · {{ checkins_today }} checked in</span>
     <h1 id="pz-headline" class="hero-title">
       {% if expiring_count %}{{ expiring_count }} membership{{ expiring_count|pluralize }} run{{ expiring_count|pluralize:"s," }} out this week.{% else %}No memberships run out this week.{% endif %}
     </h1>
@@ -27,6 +27,7 @@
     </p>
     <div class="actions">
       <a class="pz-btn pz-go" href="?show=expiring#action">{% icon "refresh" %}Start renewals</a>
+      <a class="pz-btn pz-ghost" href="{% url 'check_in' %}">{% icon "check" %}Check-in</a>
       <a class="pz-btn pz-ghost" href="{% url 'member_add' %}">{% icon "plus" %}Add member</a>
     </div>
   </div>

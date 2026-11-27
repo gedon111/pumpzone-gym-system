@@ -18,7 +18,7 @@ from django.utils import timezone
 
 from .. import status
 from ..cashup import by_staff
-from ..models import Payment
+from ..models import CheckIn, Payment
 from ..summary import summarize_all, urgency
 
 FILTERS = [  # (key in ?show=, tab label)
@@ -69,6 +69,7 @@ def dashboard(request):
 
     context = {
         "today": today,
+        "checkins_today": CheckIn.objects.filter(at__date=today).count(),
         "summaries_count": len(summaries),
         "by_status": {k: by_status[k] for k in order},
         "dots": dots,

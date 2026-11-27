@@ -20,7 +20,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from gym import dates
-from gym.models import Member, Membership, Payment, Plan
+from gym import checkin
+from gym.models import CheckIn, Member, Membership, Payment, Plan, SignUp
 from gym.roles import OWNER_GROUP, STAFF_GROUP
 
 DEMO_PASSWORD = "pumpzone-demo"  # demo accounts only, local prototype
@@ -52,6 +53,12 @@ LAST = ("Dela Cruz|Bautista|Villanueva|Reyes|Garcia|Navarro|Santos|Mendoza|Lim|T
 COUNT_ACTIVE, COUNT_EXPIRING, COUNT_EXPIRED = 186, 14, 23
 COUNT_UNPAID = 6
 COUNT_PAID_TODAY = 12  # renewals that happened today, for "Collected today"
+CARDS = 30            # members with a demo card number DEMO0001 ... DEMO0030
+CHECK_INS_TODAY = 60  # visits so far today (a few by expired members, as happens)
+SIGN_UPS_WAITING = [  # (full name, nickname, says already a member)
+    ("Sample Signup Rosa", "Rose", False),
+    ("Sample Signup Elmer", "", True),
+]
 WALK_INS_TODAY = [("Bong", "Day Pass"), ("Tess", "Day Pass"), ("Dodong", "Student Day Pass")]
 
 
@@ -84,6 +91,8 @@ class Command(BaseCommand):
             self.make_plans()
             self.make_members()
             self.make_walk_ins()
+            self.make_cards_and_check_ins()
+            self.make_sign_ups()
 
         self.stdout.write(self.style.SUCCESS(
             f"Seeded {Member.objects.count()} members, {Membership.objects.count()} memberships, "
@@ -94,6 +103,8 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
     def wipe(self):
         # Order matters: payments point at memberships, memberships at members.
+        CheckIn.objects.all().delete()
+        SignUp.objects.all().delete()
         Payment.objects.all().delete()
         Membership.objects.all().delete()
         Member.objects.all().delete()
@@ -211,6 +222,24 @@ class Command(BaseCommand):
                 walk_in_name=name, walk_in_plan=day_pass, amount=day_pass.price, method=Payment.CASH,
                 paid_on=self.time_on(self.today), received_by=self.rng.choice(self.staff),
             )
+
+    def make_cards_and_check_ins(self):
+        members = list(Member.objects.order_by("pk"))
+        for n, member in enumerate(self.rng.sample(members, CARDS), start=1):
+            member.card_uid = f"DEMO{n:04d}"  # a real card number looks like 04A1B2C3D4E5F6
+            member.save(update_fields=["card_uid"])
+
+        carded = {m.pk for m in Member.objects.exclude(card_uid=None)}
+        for member in self.rng.sample(members, CHECK_INS_TODAY):
+            visit = checkin.log(member, self.rng.choice(self.staff),
+                                CheckIn.CARD if member.pk in carded else CheckIn.TYPED)
+            visit.at = self.time_on(self.today)
+            visit.save(update_fields=["at"])
+
+    def make_sign_ups(self):
+        for n, (name, nickname, existing) in enumerate(SIGN_UPS_WAITING, start=1):
+            SignUp.objects.create(full_name=name, nickname=nickname, phone=f"0900 000 98{n:02d}",
+                                  says_existing=existing, entered_on=self.staff[0])
 
     def time_on(self, day):
         """A gym-hours time on that day, never later than right now."""

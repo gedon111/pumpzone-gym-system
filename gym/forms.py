@@ -9,7 +9,7 @@ the date picker, inputmode=decimal opens the number keyboard for money.
 from django import forms
 from django.utils import timezone
 
-from .models import Member, Membership, Payment, Plan, SignUp
+from .models import Member, Membership, Payment, Plan, SignUp, clean_card_uid
 from .services import PAY_FULL, PAY_LATER, PAY_PARTIAL
 
 DATE = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
@@ -105,9 +105,19 @@ class RenewForm(PlanChoiceForm, PaymentChoiceForm):
 class EditMemberForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ["full_name", "nickname", "phone", "birth_date", "emergency_contact_name", "emergency_contact_phone", "notes"]
+        fields = ["full_name", "nickname", "phone", "birth_date", "emergency_contact_name", "emergency_contact_phone",
+                  "card_uid", "notes"]
         widgets = {"phone": PHONE, "emergency_contact_phone": PHONE, "birth_date": DATE,
+                   "card_uid": forms.TextInput(attrs={"autocomplete": "off", "spellcheck": "false"}),
                    "notes": forms.Textarea(attrs={"rows": 3})}
+
+    def clean_card_uid(self):
+        # Tidy first, so "04 a1 b2" and "04A1B2" count as the same card.
+        uid = clean_card_uid(self.cleaned_data.get("card_uid"))
+        if uid and Member.objects.filter(card_uid=uid).exclude(pk=self.instance.pk).exists():
+            other = Member.objects.get(card_uid=uid)
+            raise forms.ValidationError(f"This card is already linked to {other.full_name} ({other.member_code}).")
+        return uid
 
 
 class PaymentForm(forms.Form):

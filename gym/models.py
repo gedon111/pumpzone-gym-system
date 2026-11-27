@@ -5,6 +5,7 @@ Database tables. Each class below becomes one table.
     Member      a person on file
     Membership  one paid period for a member (one row per renewal)
     Payment     money received, cash or GCash. Never deleted, only voided.
+    CheckIn     one visit (card tap or typed code). Replaces the logbook.
     SignUp      details a person typed in themselves on the desk phone,
                 waiting for staff to check them (see views/signups.py)
 
@@ -57,6 +58,15 @@ class Plan(TimeStamped):
         return dates.membership_end_date(start, self.unit, self.length)
 
 
+def clean_card_uid(value):
+    """
+    Card numbers as the reader types them, tidied: no spaces or colons,
+    capital letters. Blank becomes None, so many members can have no card.
+    """
+    value = "".join(ch for ch in (value or "") if ch.isalnum()).upper()
+    return value or None
+
+
 # ---------------------------------------------------------------------------
 class Member(TimeStamped):
     member_code = models.CharField(
@@ -75,6 +85,10 @@ class Member(TimeStamped):
     )
     notes = models.TextField(blank=True, help_text="Do NOT write health conditions here.")
     is_archived = models.BooleanField(default=False, help_text="Hide instead of deleting.")
+    card_uid = models.CharField(
+        "card number", max_length=40, unique=True, null=True, blank=True,
+        help_text="NFC card or keyfob number. Click here and tap the card on the reader.",
+    )
 
     class Meta:
         ordering = ["full_name"]
@@ -85,6 +99,7 @@ class Member(TimeStamped):
     def save(self, *args, **kwargs):
         if not self.member_code:
             self.member_code = self.next_code(self.joined_on.year)
+        self.card_uid = clean_card_uid(self.card_uid)
         super().save(*args, **kwargs)
 
     @staticmethod
@@ -243,6 +258,27 @@ class Payment(TimeStamped):
     @property
     def is_walk_in(self):
         return self.membership_id is None
+
+
+# ---------------------------------------------------------------------------
+class CheckIn(models.Model):
+    """One visit. Logged even when the membership has expired, so the owner sees it."""
+
+    CARD, TYPED = "card", "typed"
+    HOW_CHOICES = [(CARD, "Card"), (TYPED, "Typed")]
+
+    member = models.ForeignKey(Member, on_delete=models.PROTECT, related_name="check_ins")
+    at = models.DateTimeField(default=timezone.now, db_index=True)
+    by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, editable=False,
+                           related_name="+", help_text="Staff signed in at the desk.")
+    how = models.CharField(max_length=5, choices=HOW_CHOICES, default=TYPED)
+    status_then = models.CharField(max_length=10, blank=True, help_text="Member's status at check-in.")
+
+    class Meta:
+        ordering = ["-at"]
+
+    def __str__(self):
+        return f"{self.member.full_name} {self.at:%d %b %H:%M}"
 
 
 # ---------------------------------------------------------------------------

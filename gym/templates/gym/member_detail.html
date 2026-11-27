@@ -77,8 +77,22 @@
         <div class="fact"><span class="eyebrow">Joined</span><span class="mono">{{ member.joined_on|date:"j M Y" }}</span></div>
         <div class="fact"><span class="eyebrow">Emergency</span><strong>{{ member.emergency_contact_name|default:"–" }}</strong><span class="mono">{{ member.emergency_contact_phone }}</span></div>
         <div class="fact"><span class="eyebrow">Consent</span><span class="mono">{{ member.consent_given_on|date:"j M Y"|default:"Not recorded" }}</span></div>
+        <div class="fact"><span class="eyebrow">Card</span><span class="mono">{{ member.card_uid|default:"No card yet" }}</span></div>
       </div>
       {% if member.notes %}<p class="caption">{{ member.notes|linebreaksbr }}</p>{% endif %}
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2 class="h3">Last visits</h2><a class="pz-btn pz-ghost pz-small" href="{% url 'check_in' %}">Check-in</a></div>
+      {% for v in check_ins %}
+      <div class="visit">
+        <span class="mono muted">{{ v.at|date:"j M H:i" }}</span>
+        <span>{{ v.get_how_display }}</span>
+        <span class="pz-chip k-{{ v.status_then|default:'none' }}">{{ v.status_then|default:"–" }}</span>
+      </div>
+      {% empty %}
+      <p class="panel-pad caption">No check-ins yet.</p>
+      {% endfor %}
     </section>
   </aside>
 </div>
