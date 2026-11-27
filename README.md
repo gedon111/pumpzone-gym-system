@@ -100,12 +100,13 @@ Both desks can save at the same time. At closing, open **Payments**: the **By st
 | 15 days | ₱450 | ₱400 |
 | 30 days (Monthly) | ₱900 | ₱650 |
 
-The owner can change prices in `/admin/` under Plans. To retire an old price, untick "is active" so its history is kept.
+Student prices need a student ID or a school uniform. The plan picker and the check-in screen remind staff. The owner can change prices in `/admin/` under Plans. To retire an old price, untick "is active" so its history is kept.
 
 **Late payments:** a balance counts as late 3 days after the start date. To change that, set `PUMPZONE_GRACE_DAYS` (see Settings). No code changes are needed.
 
 **Check-in** (replaces the logbook): open **Check-in**. The box is ready to type in.
-- **With a USB NFC reader:** tap the card. Readers in "keyboard mode" (ACR122U type, or the cheap 13.56 MHz USB ones) type the card number and press Enter by themselves. No driver or app is needed. To give a member a card, open them, choose **Edit**, click **Card number** and tap the card.
+- **With a USB NFC reader:** tap the card. Buy the kind sold as a "USB 13.56 MHz IC/NFC card reader, keyboard emulation" (plug and play). It types the card number and presses Enter by itself, with no driver or app. It also works on an Android phone or tablet with a USB-OTG adapter. Readers like the ACR122U are a different kind: they need a driver and extra software, so they won't work this way.
+- **To give a member a card:** open them, choose **Edit**, click **Card number** and tap the card. Use the same reader model for linking and checking in, because readers can write the same card's number differently (some in hex, some in decimal).
 - **Without a reader:** type a member code (`2026-0001`), a phone number, or a nickname, then Enter. In the demo, try `DEMO0001`.
 - **The answer:** green means Active. Amber means expiring soon or owes money. Red means expired, no membership, or late payment. Every visit is logged, even red ones, so the owner can see who trains without paying.
 - Phone NFC (Web NFC) isn't used. It only works in Chrome on Android over HTTPS, and the local prototype runs over plain HTTP.
@@ -178,7 +179,7 @@ Test a restore once before the gym relies on this. A backup you've never restore
 .venv\Scripts\python.exe manage.py test
 ```
 
-There are 99 tests. They cover the expiry and payment rules at every boundary day (the core of the product). They also cover the screens, check-in, sign-up mode and its lock, per-staff totals, the GCash QR, SMS text, import, seed and backups.
+There are 100 tests. They cover the expiry and payment rules at every boundary day (the core of the product). They also cover the screens, check-in, sign-up mode and its lock, per-staff totals, the GCash QR, SMS text, import, seed and backups.
 
 ---
 

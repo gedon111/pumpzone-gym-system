@@ -19,7 +19,7 @@ Version 1, 2026-11-26.
 | Payment methods | About 1 in 10 pay by GCash. Cash and GCash only, plus a fake QR Ph | "Other" is removed. A DEMO QR shows when GCash is chosen. The real QR image from the GCash app replaces it through a setting. |
 | Staff | One per floor, 2 floors | A per-staff cash-up (one row per drawer). SQLite is in WAL mode so two desks can save at once. |
 | Walk-ins | Tracked by name | Unchanged, plus an adult or student day pass choice. |
-| NFC | Not decided, but make it ready | A card number on each member, and a **Check-in screen**. A USB NFC reader in keyboard mode types the card number. Without one, staff type a code, phone or nickname. |
+| NFC | Not decided, but make it ready | A card number on each member, and a **Check-in screen**. A USB NFC reader that works as a keyboard ("keyboard emulation") types the card number. Without one, staff type a code, phone or nickname. |
 | Hosting | Undecided, temporary | Stays local. |
 
 **Deviation from section 1 "Not in v1":** check-in is now built (typed or card), because "NFC ready" needs somewhere to tap the card. Automatic reminders, online payments and turnstiles are still out.
@@ -28,6 +28,26 @@ Version 1, 2026-11-26.
 1. For about one month, keep the desk phone ready in sign-up mode when members arrive.
 2. Every active member visits at least once a month. They type their own details, and staff carry over their notebook period (plan, start date, amount paid). The payment is dated on the notebook date, so today's drawer stays correct.
 3. After 30 days, everyone active is in the system. Retire the notebook. Anyone missing can still go in by CSV import.
+
+**Update 2026-11-27, second round:** this is a **prototype for a proposal**. Nothing real goes into it: no real GCash QR, no real members, no deployment. Real data and go-live come only after the owner says yes.
+
+| Topic | Answer | Effect |
+|---|---|---|
+| Prices | Not confirmed yet | The demo keeps the six prices above, marked as unconfirmed. |
+| "30 days" | Same date next month | Already built that way (25 Nov to 25 Dec, 31 Jan to 28 Feb). |
+| Student price | Student ID, or coming in school uniform, is enough | Not recorded in the system. The plan picker and check-in screen remind staff to look for an ID or uniform. |
+| GCash QR | No real QR: it's a prototype | The DEMO QR stays. |
+| Active members now | Unknown | Ask at the pitch. |
+| Desk devices | None at the gym, but there is Wi-Fi | See "What the gym would need" below. |
+| NFC | Undecided, but make it ready | Already NFC-ready. No reader is needed to demo it. |
+| Monthly fee | Yes in principle, as part of the proposal | Goes into the proposal, not set up now. |
+
+**What the gym would need (for the proposal, prices are [GUESS]):** the gym has no computer, so the system can't run on a PC at the gym the way the prototype runs on the developer's laptop.
+- **Where it runs:** hosted online (section 6, about USD 10 a month) is the realistic choice. Both floors use it over the Wi-Fi with nothing to install, and the data survives if a device breaks. The alternative is an always-on PC or old laptop at the gym (about PHP 8,000 to 15,000), but then a power cut or a broken PC stops the desk, and backups need someone to remember them.
+- **At each desk, one of:**
+  - Staff use their own phones, signed in to their own accounts: PHP 0 to start. The downside is that sign-up mode means handing a personal phone to a member.
+  - One budget Android tablet per floor: about PHP 4,000 to 7,000 each, so PHP 8,000 to 14,000 for both floors. This is the better fit for sign-up mode and check-in.
+- **Later, only if they want cards:** a keyboard-emulation USB NFC reader per desk (about PHP 500 to 1,500) plus a USB-OTG adapter for a tablet, and cards or keyfobs at about PHP 15 to 50 each.
 
 Labels used below:
 - **[FACT]** checked against a source on 2026-11-26.
@@ -227,7 +247,7 @@ I am not a lawyer. This is a minimum checklist.
 - Adds a CheckIn table (member, time, staff). The scan screen shows a big green or red status.
 
 ### Phase 4: NFC (optional)
-- USB NFC reader (ACR122U class) about PHP 1,500 to 3,000. NFC cards or keyfobs about PHP 15 to 50 each **[GUESS]**.
+- A USB 13.56 MHz NFC reader **with keyboard emulation** (plug and play, types the card number) about PHP 500 to 1,500, and NFC cards or keyfobs about PHP 15 to 50 each **[GUESS]**. Not the ACR122U kind: it needs a driver and extra software to type numbers.
 - Browser support is the weak point: Web NFC only works in Chrome on Android. A USB reader works like a keyboard, which is simpler.
 - **Unrealistic for this project**: automatic turnstiles or door locks. They need hardware, installation, safety and liability work beyond a freelance web project.
 
@@ -264,17 +284,15 @@ Rule: do not start M2 until the owner says yes at M1.
 
 ## 13. Open questions for the gym owner
 
-Answered on 2026-11-27 (see the update at the top): plans and prices, grace period, monthly end date, cash vs GCash split, staff per floor, walk-ins by name.
+Already answered (see the updates at the top): grace period, "30 days" = same date next month, student ID or uniform for student prices, cash vs GCash split, one staff member per floor, walk-ins by name, Wi-Fi but no desk devices.
 
-Still open:
-1. **Prices:** please confirm the six prices. They were given from memory.
-2. **"30 days":** does it mean the same date next month (25 Nov to 25 Dec, as built), or exactly 30 days?
-3. **Students:** does staff check a student ID before giving the student price? If so, should the system record it?
-4. **GCash:** is there one GCash number for the gym? Send the QR image from the GCash app (Receive > QR) to replace the demo one.
-5. **Moving off the notebook:** are you OK with members typing their own details on the desk phone for about a month (see the move-over plan above)? How many active members are there right now?
-6. **Desk devices:** what is on each floor's desk (phone, tablet, laptop)? Is the gym's Wi-Fi reliable on both floors?
-7. **NFC:** would you buy a USB reader (about PHP 1,500 to 3,000 **[GUESS]**) and cards or keyfobs (about PHP 15 to 50 each **[GUESS]**)? Who pays for a lost card?
-8. **Hosting and fee:** would you pay about PHP 1,200 a month for hosting and upkeep? This decides when the system goes online.
+To ask **at the pitch**. Nothing here is needed to show the prototype:
+1. **Prices:** confirm the six prices. The demo uses the ones given from memory.
+2. **Members:** how many are active right now? Are they OK with members typing their own details on a tablet for about a month to move off the notebook?
+3. **Devices:** staff's own phones to start (PHP 0), or one tablet per floor (about PHP 4,000 to 7,000 each **[GUESS]**)?
+4. **Hosting and fee:** hosted online (about USD 10 a month) inside a monthly fee of about PHP 1,200. Is that OK? This decides when the system goes online.
+5. **GCash (only after a yes):** one GCash number for the gym? Its QR image replaces the demo one.
+6. **NFC (only if they want cards):** a keyboard-emulation reader per desk (about PHP 500 to 1,500 **[GUESS]**) and cards or keyfobs (about PHP 15 to 50 each). Who pays for a lost card?
 
 ---
 
