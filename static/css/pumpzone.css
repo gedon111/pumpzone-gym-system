@@ -247,6 +247,10 @@ table.pz-t td { padding: 13px 18px; border-bottom: 1px solid rgba(255, 255, 255,
 table.pz-t td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 table.pz-t .r { text-align: right; }
 table.pz-t tr.voided td { color: var(--ink-3); text-decoration: line-through; }
+table.pz-t.compact { min-width: 420px; }
+table.pz-t td.cash-cell { color: var(--go); font-weight: 600; }
+.staff-cash { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; }
+.staff-cash li { display: flex; justify-content: space-between; gap: 12px; padding-top: 6px; border-top: 1px solid var(--line-soft); }
 
 /* 12. Forms (big tap targets for the front-desk phone) ---------------------- */
 .form { display: flex; flex-direction: column; gap: 18px; }

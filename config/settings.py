@@ -78,6 +78,15 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": DATA_DIR / "db.sqlite3",
+        # Two desks (one per floor) save at the same time. These stop
+        # "database is locked" errors: WAL lets reads and a write happen
+        # together, IMMEDIATE takes the write lock up front, and timeout
+        # makes the second desk wait up to 20 s instead of failing.
+        "OPTIONS": {
+            "init_command": "PRAGMA journal_mode=WAL;",
+            "transaction_mode": "IMMEDIATE",
+            "timeout": 20,
+        },
     }
 }
 

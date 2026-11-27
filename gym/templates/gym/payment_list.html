@@ -22,6 +22,26 @@
   </div>
 </section>
 
+{% if staff %}
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="h2">By staff</h2>
+    <span class="caption">One row per desk. Count each floor's drawer against its cash total.</span>
+  </div>
+  <div class="scroll-x">
+    <table class="pz-t compact">
+      <thead><tr><th>Staff</th><th class="r">Payments</th><th class="r">Cash</th><th class="r">GCash</th><th class="r">Total</th></tr></thead>
+      <tbody>
+        {% for r in staff %}
+        <tr><td>{{ r.name }}</td><td class="n r">{{ r.count }}</td><td class="n r cash-cell">{{ r.cash|peso }}</td>
+            <td class="n r">{{ r.gcash|peso }}</td><td class="n r">{{ r.total|peso }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
 <section class="panel">
   <div class="panel-head"><h2 class="h2">{{ payments|length }} payment{{ payments|length|pluralize }}</h2></div>
   {% include "gym/_payment_table.html" with payments=payments %}

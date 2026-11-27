@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
+from ..cashup import by_staff
 from ..forms import PaymentForm, WalkInForm
 from ..models import Member, Payment
 from ..services import record_payment
@@ -65,7 +66,7 @@ def payment_list(request):
         if amount:
             totals.append({"label": label, "amount": amount})
     return render(request, "gym/payment_list.html", {
-        "day": day, "is_today": day == today, "payments": payments, "totals": totals,
+        "day": day, "is_today": day == today, "payments": payments, "totals": totals, "staff": by_staff(payments),
         "total": sum((p.amount for p in kept), Decimal("0")),
         "prev_day": day - timedelta(days=1), "next_day": day + timedelta(days=1) if day < today else None,
     })

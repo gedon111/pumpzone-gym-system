@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .. import status
+from ..cashup import by_staff
 from ..models import Payment
 from ..summary import summarize_all, urgency
 
@@ -100,7 +101,7 @@ def expiry_calendar(summaries, today, days=28):
 
 def collected_today(today):
     """Money taken today, split by method. Voided payments are left out."""
-    payments = Payment.objects.filter(paid_on__date=today, is_voided=False)
+    payments = list(Payment.objects.filter(paid_on__date=today, is_voided=False).select_related("received_by"))
     total = Decimal("0")
     methods = []
     for key, label in Payment.METHOD_CHOICES:
@@ -110,4 +111,5 @@ def collected_today(today):
         methods.append({"key": key, "label": label, "count": len(rows), "amount": amount})
     for m in methods:
         m["share"] = round(m["amount"] / total * 100) if total else 0
-    return {"total": total, "count": sum(m["count"] for m in methods), "methods": methods}
+    return {"total": total, "count": sum(m["count"] for m in methods), "methods": methods,
+            "staff": by_staff(payments)}  # one row per desk / floor

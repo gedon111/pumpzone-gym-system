@@ -96,7 +96,12 @@
         </div>
         {% endfor %}
       </div>
-      <p class="caption">Check the cash total against the drawer before closing.</p>
+      {% if collected.staff %}
+      <ul class="staff-cash">
+        {% for r in collected.staff %}<li><span>{{ r.name }}</span><span class="mono">{{ r.cash|peso }} cash</span></li>{% endfor %}
+      </ul>
+      {% endif %}
+      <p class="caption">Each floor checks its cash against its drawer before closing. <a href="{% url 'payment_list' %}">Full cash-up</a></p>
     </section>
 
     {# ---- 4-week expiry calendar ---- #}
