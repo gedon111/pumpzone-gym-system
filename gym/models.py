@@ -1,7 +1,7 @@
 """
 Database tables. Each class below becomes one table.
 
-    Plan        the price list (Monthly, Student Monthly, 3 Months, Day Pass)
+    Plan        the price list (Monthly, 15 Days, Day Pass, and Student versions)
     Member      a person on file
     Membership  one paid period for a member (one row per renewal)
     Payment     money received, cash or GCash. Never deleted, only voided.
@@ -199,6 +199,10 @@ class Payment(TimeStamped):
     )
     walk_in_name = models.CharField(
         max_length=120, blank=True, help_text="Walk-in day pass only. Valid on the day paid."
+    )
+    walk_in_plan = models.ForeignKey(
+        Plan, on_delete=models.PROTECT, null=True, blank=True, related_name="+",
+        help_text="Walk-in only: which day pass (adult or student).",
     )
     amount = models.DecimalField(max_digits=9, decimal_places=2)
     method = models.CharField(max_length=6, choices=METHOD_CHOICES, default=CASH)

@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 
 from ..forms import PaymentForm, WalkInForm
-from ..models import Member, Payment, Plan
+from ..models import Member, Payment
 from ..services import record_payment
 from ..templatetags.pumpzone import peso
 
@@ -41,13 +41,13 @@ def payment_add(request, pk):
 
 def walk_in(request):
     """Day pass for a non-member: a payment with a name, valid today only."""
-    day_pass = Plan.objects.filter(is_active=True, unit="day", length=1).first()
-    form = WalkInForm(request.POST or None, initial={"amount": day_pass.price if day_pass else None})
+    form = WalkInForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         d = form.cleaned_data
-        record_payment(walk_in_name=d["walk_in_name"].strip(), amount=d["amount"], method=d["method"],
-                       reference_no=d["reference_no"], user=request.user)
-        messages.success(request, f"Day pass for {d['walk_in_name']}: {peso(d['amount'])} received. Valid today only.")
+        record_payment(walk_in_name=d["walk_in_name"].strip(), walk_in_plan=d["day_pass"], amount=d["amount"],
+                       method=d["method"], reference_no=d["reference_no"], user=request.user)
+        messages.success(request, f"{d['day_pass'].name} for {d['walk_in_name']}: {peso(d['amount'])} received. "
+                                  "Valid today only.")
         return redirect("payment_list")
     return render(request, "gym/payment_form.html", {"form": form, "title": "Walk-in day pass"})
 
@@ -57,7 +57,7 @@ def payment_list(request):
     today = timezone.localdate()
     day = parse_date(request.GET.get("day", "")) or today
     payments = list(Payment.objects.filter(paid_on__date=day)
-                    .select_related("membership__member", "membership__plan", "received_by"))
+                    .select_related("membership__member", "membership__plan", "walk_in_plan", "received_by"))
     kept = [p for p in payments if not p.is_voided]
     totals = []
     for key, label in Payment.METHOD_CHOICES:

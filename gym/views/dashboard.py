@@ -81,7 +81,7 @@ def dashboard(request):
         "calendar": expiry_calendar(summaries, today),
         "weekdays": [(today + timedelta(days=i)).strftime("%a") for i in range(7)],
         "collected": collected_today(today),
-        "latest_payments": Payment.objects.select_related("membership__member", "membership__plan", "received_by")[:8],
+        "latest_payments": Payment.objects.select_related("membership__member", "membership__plan", "walk_in_plan", "received_by")[:8],
     }
     return render(request, "gym/dashboard.html", context)
 

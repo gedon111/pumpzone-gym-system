@@ -134,17 +134,35 @@ class PaymentForm(forms.Form):
         return data
 
 
+def day_passes():
+    """The 1-day plans: Day Pass and Student Day Pass."""
+    return active_plans().filter(unit="day", length=1).order_by("-price")
+
+
 class WalkInForm(forms.Form):
     """Day pass for someone who is not a member. Valid on the day paid."""
 
     walk_in_name = forms.CharField(label="Name", max_length=120)
-    amount = forms.DecimalField(min_value=0.01, widget=MONEY)
+    day_pass = forms.ModelChoiceField(label="Pass", queryset=Plan.objects.none(), empty_label=None,
+                                      widget=forms.RadioSelect)
+    amount = forms.DecimalField(required=False, min_value=0.01, widget=MONEY,
+                                help_text="Leave blank for the pass price.")
     method = forms.ChoiceField(widget=forms.RadioSelect, choices=Payment.METHOD_CHOICES, initial=Payment.CASH)
     reference_no = forms.CharField(label="GCash reference no.", required=False, max_length=40,
                                    widget=forms.TextInput(attrs={"inputmode": "numeric", "autocomplete": "off"}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        passes = day_passes()
+        field = self.fields["day_pass"]
+        field.queryset = passes
+        field.label_from_instance = lambda p: f"{p.name} · ₱{p.price:,.0f}"
+        field.initial = passes.first()  # the adult pass (highest price)
 
     def clean(self):
         data = super().clean()
         if data.get("method") == Payment.GCASH and not data.get("reference_no", "").strip():
             self.add_error("reference_no", "GCash payments need the reference number.")
+        if data.get("day_pass") and not data.get("amount"):
+            data["amount"] = data["day_pass"].price  # blank = the pass price
         return data

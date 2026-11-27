@@ -13,7 +13,7 @@ from django.contrib import admin
 from .models import Member, Membership, Payment, Plan
 from .roles import is_owner
 
-LOCKED_PAYMENT_FIELDS = ("membership", "walk_in_name", "amount", "method", "reference_no", "paid_on")
+LOCKED_PAYMENT_FIELDS = ("membership", "walk_in_name", "walk_in_plan", "amount", "method", "reference_no", "paid_on")
 
 
 @admin.register(Plan)

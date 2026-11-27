@@ -41,10 +41,10 @@ def add_member(*, member_fields, user, **sale):
     return member
 
 
-def record_payment(*, amount, method, user, membership=None, walk_in_name="", reference_no=""):
+def record_payment(*, amount, method, user, membership=None, walk_in_name="", walk_in_plan=None, reference_no=""):
     """Money received. Checked by Payment.clean() (GCash ref, amount > 0)."""
     payment = Payment(
-        membership=membership, walk_in_name=walk_in_name, amount=Decimal(amount),
+        membership=membership, walk_in_name=walk_in_name, walk_in_plan=walk_in_plan, amount=Decimal(amount),
         method=method, reference_no=reference_no.strip(), received_by=user,
     )
     payment.full_clean()

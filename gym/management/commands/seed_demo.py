@@ -30,12 +30,15 @@ DEMO_USERS = [  # username, first name, role
     ("rico", "Rico", STAFF_GROUP),
 ]
 
-# Prices are guesses until the owner confirms them (PLAN.md section 13).
+# The gym's price list, as told by the owner (2026-11-27).
+# "30 days" plans use the calendar-month rule: 25 Nov to 25 Dec.
 PLANS = [  # name, length, unit, price, how often it is picked
-    ("Monthly", 1, dates.MONTH, "1000", 60),
-    ("Student Monthly", 1, dates.MONTH, "800", 25),
-    ("3 Months", 3, dates.MONTH, "2700", 15),
-    ("Day Pass", 1, dates.DAY, "150", 0),
+    ("Monthly", 1, dates.MONTH, "900", 55),
+    ("15 Days", 15, dates.DAY, "450", 10),
+    ("Day Pass", 1, dates.DAY, "100", 0),            # walk-ins only
+    ("Student Monthly", 1, dates.MONTH, "650", 28),
+    ("Student 15 Days", 15, dates.DAY, "400", 7),
+    ("Student Day Pass", 1, dates.DAY, "70", 0),     # walk-ins only
 ]
 
 FIRST = ("Marco Kristine Jessa Paolo Jun Bea Ramon Angelica Ana Carlo Jerome Mae Joy Mark Joan "
@@ -49,7 +52,14 @@ LAST = ("Dela Cruz|Bautista|Villanueva|Reyes|Garcia|Navarro|Santos|Mendoza|Lim|T
 COUNT_ACTIVE, COUNT_EXPIRING, COUNT_EXPIRED = 186, 14, 23
 COUNT_UNPAID = 6
 COUNT_PAID_TODAY = 12  # renewals that happened today, for "Collected today"
-WALK_INS_TODAY = ["Walk-in: Bong", "Walk-in: Tess", "Walk-in: Dodong"]
+WALK_INS_TODAY = [("Bong", "Day Pass"), ("Tess", "Day Pass"), ("Dodong", "Student Day Pass")]
+
+
+def start_for_end(plan, end):
+    """The start date that makes this plan end on `end`."""
+    if plan.unit == dates.MONTH:
+        return dates.add_months(end, -plan.length)
+    return end - timedelta(days=plan.length - 1)
 
 
 class Command(BaseCommand):
@@ -134,7 +144,7 @@ class Command(BaseCommand):
             # About 40% have an earlier, fully paid period before this one.
             history_start = None
             if self.rng.random() < 0.4:
-                history_start = dates.add_months(start, -plan.length)
+                history_start = start_for_end(plan, start - timedelta(days=1))
 
             member = Member.objects.create(
                 full_name=f"{self.rng.choice(FIRST)} {self.rng.choice(LAST)}",
@@ -152,7 +162,7 @@ class Command(BaseCommand):
             current = self.sell(member, plan, start)
             if i in unpaid:
                 # Owes money: paid part of it, or nothing.
-                part = self.rng.choice([Decimal("0"), Decimal("500")])
+                part = self.rng.choice([Decimal("0"), Decimal("300")])
                 if part:
                     self.pay(current, part, start)
             else:
@@ -168,9 +178,11 @@ class Command(BaseCommand):
             days_left = self.rng.randint(0, 7)
         elif kind == "expired":
             days_left = -self.rng.randint(1, 30)
+        elif plan.unit == dates.DAY:
+            days_left = self.rng.randint(8, plan.length - 1)  # a 15-day plan has at most 14 days left
         else:
             days_left = self.rng.randint(8, 28 * plan.length)
-        return dates.add_months(self.today + timedelta(days=days_left), -plan.length)
+        return start_for_end(plan, self.today + timedelta(days=days_left))
 
     def fake_birth_date(self):
         if self.rng.random() < 0.5:
@@ -193,10 +205,10 @@ class Command(BaseCommand):
         )
 
     def make_walk_ins(self):
-        day_pass = Plan.objects.get(name="Day Pass")
-        for label in WALK_INS_TODAY:
+        for name, pass_name in WALK_INS_TODAY:
+            day_pass = Plan.objects.get(name=pass_name)
             Payment.objects.create(
-                walk_in_name=label.split(": ")[1], amount=day_pass.price, method=Payment.CASH,
+                walk_in_name=name, walk_in_plan=day_pass, amount=day_pass.price, method=Payment.CASH,
                 paid_on=self.time_on(self.today), received_by=self.rng.choice(self.staff),
             )
 

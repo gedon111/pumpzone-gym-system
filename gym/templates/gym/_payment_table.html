@@ -7,7 +7,7 @@
     {% for p in payments %}
       <tr {% if p.is_voided %}class="voided" title="Voided: {{ p.void_reason }}"{% endif %}>
         <td class="n">{% if p.paid_on|date:"Ymd" == now_ymd %}{{ p.paid_on|time:"H:i" }}{% else %}{{ p.paid_on|date:"j M H:i" }}{% endif %}</td>
-        <td>{% if p.membership %}<a href="{% url 'member_detail' p.membership.member_id %}">{{ p.membership.member.full_name }}</a>{% else %}{{ p.walk_in_name }} <span class="muted">(walk-in)</span>{% endif %}</td>
+        <td>{% if p.membership %}<a href="{% url 'member_detail' p.membership.member_id %}">{{ p.membership.member.full_name }}</a>{% else %}{{ p.walk_in_name }} <span class="muted">({% if p.walk_in_plan %}{{ p.walk_in_plan.name|lower }}{% else %}walk-in{% endif %})</span>{% endif %}</td>
         <td>{% if p.membership %}{{ p.membership.plan.name }}{% else %}Day pass{% endif %}</td>
         <td><span class="pz-chip k-plain">{{ p.get_method_display }}</span></td>
         <td class="n">{{ p.reference_no|default:"–" }}</td>

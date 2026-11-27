@@ -84,11 +84,25 @@ class ScreenTests(TestCase):
 
     # ---- Walk-in ------------------------------------------------------------
     def test_walk_in_day_pass(self):
-        self.assertEqual(self.client.get("/payments/walk-in/").context["form"].initial["amount"], Decimal("150"))
-        self.client.post("/payments/walk-in/", {"walk_in_name": "Bong", "amount": "150", "method": "cash"})
+        form = self.client.get("/payments/walk-in/").context["form"]
+        self.assertEqual(form.fields["day_pass"].initial, self.day_pass)  # adult pass picked first
+        self.client.post("/payments/walk-in/", {"walk_in_name": "Bong", "day_pass": self.day_pass.pk,
+                                                "amount": "150", "method": "cash"})
         payment = Payment.objects.get()
         self.assertTrue(payment.is_walk_in)
+        self.assertEqual(payment.walk_in_plan, self.day_pass)
         self.assertContains(self.client.get("/payments/"), "Bong")
+
+    def test_walk_in_student_pass_blank_amount_uses_pass_price(self):
+        student = Plan.objects.create(name="Student Day Pass", length=1, unit="day", price=Decimal("70"))
+        self.client.post("/payments/walk-in/", {"walk_in_name": "Tess", "day_pass": student.pk, "method": "cash"})
+        payment = Payment.objects.get()
+        self.assertEqual(payment.amount, Decimal("70"))
+        self.assertEqual(payment.walk_in_plan, student)
+
+    def test_walk_in_offers_only_day_passes(self):
+        form = self.client.get("/payments/walk-in/").context["form"]
+        self.assertNotIn(self.monthly, form.fields["day_pass"].queryset)
 
     # ---- Search and pages ---------------------------------------------------
     def test_search_by_nickname_code_and_phone_without_spaces(self):
