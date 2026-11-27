@@ -93,17 +93,19 @@ h1, h2, h3 { margin: 0; }
 .caption { font-size: 13px; color: var(--ink-3); }
 
 /* 4. Header ---------------------------------------------------------------- */
-.pz-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 18px 0; }
+.pz-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; padding: 18px 0; }
 .brand { display: flex; align-items: baseline; gap: 12px; text-decoration: none; color: var(--ink); }
 .brand:hover { color: var(--ink); }
 .brand-name { font: 800 24px var(--display); font-stretch: 125%; letter-spacing: .02em; }
 .brand-sub { font: 500 12px var(--mono); color: var(--ink-3); }
 .pz-nav { display: flex; flex-wrap: wrap; gap: 2px; }
 .pz-nav a { color: rgba(241, 238, 244, .78); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center;
-  padding: 0 12px; border-radius: 8px; font: 500 14px var(--text); }
+  padding: 0 12px; border-radius: 8px; font: 500 14px var(--text); white-space: nowrap; }
 .pz-nav a:hover { color: var(--ink); background: rgba(255, 255, 255, .06); }
 .pz-nav a.on { color: var(--ink); background: rgba(255, 255, 255, .08); }
-.search { flex: 1 1 240px; min-width: 200px; position: relative; display: flex; align-items: center; }
+.search { flex: 1 1 200px; min-width: 160px; position: relative; display: flex; align-items: center; }
+/* Six menu items: drop the small "membership desk" label before the header wraps. */
+@media (max-width: 1400px) { .brand-sub { display: none; } }
 .search svg { position: absolute; left: 14px; color: var(--ink-3); pointer-events: none; }
 .pz-input { width: 100%; min-height: 44px; padding: 0 14px 0 40px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .16);
   background: var(--raised); color: var(--ink); font: 400 14px var(--text); }
@@ -281,7 +283,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 /* 12b. GCash QR panel: shown only when "GCash" is ticked in the same form */
 .gcash-panel { display: none; grid-template-columns: minmax(140px, 200px) 1fr; gap: 18px; align-items: center; padding: 16px;
-  border-radius: 14px; border: 1px solid var(--line); background: var(--raised) var(--speck); }
+  border-radius: 14px; border: 1px solid var(--line); background: var(--raised-2); }
 .form:has(input[name="method"][value="gcash"]:checked) .gcash-panel { display: grid; }
 .qr-frame { position: relative; padding: 10px; border-radius: 12px; background: var(--ink);
   box-shadow: 0 0 0 1px var(--line), 0 14px 30px -18px rgba(0, 0, 0, .9); }

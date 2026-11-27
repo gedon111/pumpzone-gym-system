@@ -208,7 +208,8 @@ class Command(BaseCommand):
         )
 
     def pay(self, membership, amount, on_date):
-        method = self.rng.choice([Payment.CASH, Payment.CASH, Payment.GCASH])
+        # About 1 in 10 pay by GCash (owner, 2026-11-27).
+        method = self.rng.choices([Payment.CASH, Payment.GCASH], weights=[9, 1])[0]
         Payment.objects.create(
             membership=membership, amount=amount, method=method,
             reference_no=self.fake_gcash_ref() if method == Payment.GCASH else "",
@@ -242,9 +243,12 @@ class Command(BaseCommand):
                                   says_existing=existing, entered_on=self.staff[0])
 
     def time_on(self, day):
-        """A gym-hours time on that day, never later than right now."""
-        moment = timezone.make_aware(datetime.combine(day, time(self.rng.randint(6, 20), self.rng.randint(0, 59))))
-        return min(moment, timezone.now())
+        """A random gym-hours time (6:00 to 21:00) on that day, never later than right now."""
+        opens = timezone.make_aware(datetime.combine(day, time(6, 0)))
+        closes = min(timezone.make_aware(datetime.combine(day, time(21, 0))), timezone.now())
+        if closes <= opens:
+            return closes  # seeding before 6 am: everything "today" happens now
+        return opens + timedelta(seconds=self.rng.randint(0, int((closes - opens).total_seconds())))
 
     def fake_gcash_ref(self):
         return f"{self.rng.randint(1000, 9999)} {self.rng.randint(100, 999)} {self.rng.randint(100, 999)}"

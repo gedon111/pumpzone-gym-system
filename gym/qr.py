@@ -30,7 +30,8 @@ DEMO_TEXT = "PUMPZONE DEMO - NOT A REAL GCASH ACCOUNT"
 @lru_cache(maxsize=1)
 def demo_qr_svg():
     """The demo QR as inline SVG (made once, then reused)."""
-    qr = segno.make(DEMO_TEXT, error="m")
+    # error="h": the code still scans with up to 30% covered (the DEMO stamp sits on top).
+    qr = segno.make(DEMO_TEXT, error="h")
     return qr.svg_inline(dark="#0d0c10", light="#f1eef4", border=2, omitsize=True,
                          svgclass="qr-code", title="Demo QR code, cannot receive money")
 

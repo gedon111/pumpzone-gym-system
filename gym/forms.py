@@ -203,7 +203,7 @@ class SignUpForm(forms.ModelForm):
                   "says_existing"]
         labels = {"full_name": "Full name", "nickname": "Nickname (what we call you)", "phone": "Mobile number",
                   "emergency_contact_name": "Emergency contact name", "emergency_contact_phone": "Emergency contact number"}
-        help_texts = {"phone": "For membership reminders only.", "birth_date": "Optional."}
+        help_texts = {"phone": "For membership reminders only."}
         widgets = {"phone": PHONE, "emergency_contact_phone": PHONE, "birth_date": DATE,
                    "full_name": forms.TextInput(attrs={"autocomplete": "off", "autocapitalize": "words"}),
                    "nickname": forms.TextInput(attrs={"autocomplete": "off"})}

@@ -29,6 +29,7 @@
       <a class="pz-btn pz-go" href="?show=expiring#action">{% icon "refresh" %}Start renewals</a>
       <a class="pz-btn pz-ghost" href="{% url 'check_in' %}">{% icon "check" %}Check-in</a>
       <a class="pz-btn pz-ghost" href="{% url 'member_add' %}">{% icon "plus" %}Add member</a>
+      <form method="post" action="{% url 'kiosk_start' %}">{% csrf_token %}<button class="pz-btn pz-ghost" type="submit" title="Hand this phone to a member so they can type in their own details">{% icon "message" %}Member sign-up</button></form>
     </div>
   </div>
 

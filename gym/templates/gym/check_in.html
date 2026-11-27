@@ -7,6 +7,10 @@
     <span class="eyebrow">{% now "l, j F" %} · {{ count_today }} checked in today</span>
     <h1 class="page-title">Check-in</h1>
   </div>
+  <div class="actions">
+    <a class="pz-btn pz-ghost" href="{% url 'walk_in' %}">{% icon "cash" %}Walk-in day pass</a>
+    <form method="post" action="{% url 'kiosk_start' %}">{% csrf_token %}<button class="pz-btn pz-ghost" type="submit">{% icon "plus" %}New member signs up</button></form>
+  </div>
 </div>
 
 <div class="layout">
