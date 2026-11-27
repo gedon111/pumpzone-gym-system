@@ -9,6 +9,26 @@ Version 1, 2026-11-26.
 - Walk-ins are logged as a day-pass payment with a name, valid for that day only.
 - NFC membership cards are the planned check-in method (replacing the QR-first idea in Phase 3). Not built in v1.
 
+**Update 2026-11-27: answers relayed by the developer.** These change the build as follows:
+
+| Topic | Answer | What was built |
+|---|---|---|
+| Prices | Adult: day PHP 100, 15 days PHP 450, 30 days PHP 900. Student: day PHP 70, 15 days PHP 400, 30 days PHP 650 (from memory, to be confirmed). | Six plans in the demo seed. The 3 Months plan is dropped. "30 days" uses the calendar-month rule (25 Nov to 25 Dec). 15 days = start day plus 14. |
+| Grace period | 3 days, for now | Unchanged. It is the `PUMPZONE_GRACE_DAYS` setting. |
+| Getting members in | Members (or staff) type their own details in | **Sign-up mode** on the desk phone, tablet or laptop: the device locks to a sign-up form, and staff unlock it with their password. Staff then check each sign-up: new member, notebook member (carry over the period they already paid), same as an existing member, or dismiss. |
+| Payment methods | About 1 in 10 pay by GCash. Cash and GCash only, plus a fake QR Ph | "Other" is removed. A DEMO QR shows when GCash is chosen. The real QR image from the GCash app replaces it through a setting. |
+| Staff | One per floor, 2 floors | A per-staff cash-up (one row per drawer). SQLite is in WAL mode so two desks can save at once. |
+| Walk-ins | Tracked by name | Unchanged, plus an adult or student day pass choice. |
+| NFC | Not decided, but make it ready | A card number on each member, and a **Check-in screen**. A USB NFC reader in keyboard mode types the card number. Without one, staff type a code, phone or nickname. |
+| Hosting | Undecided, temporary | Stays local. |
+
+**Deviation from section 1 "Not in v1":** check-in is now built (typed or card), because "NFC ready" needs somewhere to tap the card. Automatic reminders, online payments and turnstiles are still out.
+
+**Notebook move-over plan (replaces typing the whole notebook into a CSV):**
+1. For about one month, keep the desk phone ready in sign-up mode when members arrive.
+2. Every active member visits at least once a month. They type their own details, and staff carry over their notebook period (plan, start date, amount paid). The payment is dated on the notebook date, so today's drawer stays correct.
+3. After 30 days, everyone active is in the system. Retire the notebook. Anyone missing can still go in by CSV import.
+
 Labels used below:
 - **[FACT]** checked against a source on 2026-11-26.
 - **[GUESS]** an estimate. Confirm it before you quote it to the owner.
@@ -244,17 +264,17 @@ Rule: do not start M2 until the owner says yes at M1.
 
 ## 13. Open questions for the gym owner
 
-1. How many members in total, and how many are active right now?
-2. What plans and prices exist (monthly, student, 3-month, daily walk-in)?
-3. Do walk-in daily customers need to be tracked by name?
-4. Who collects payments, and who can give discounts?
-5. Rough split of cash vs GCash? Is there one GCash number or several?
-6. Is there a grace period for late payments? How many days?
-7. How many staff, and do they share one desk phone?
-8. Is the gym's internet reliable? If not, will staff use mobile data on the desk phone?
-9. Who will type in the notebook data: staff, you, or paid help?
-10. Would they pay about PHP 1,200 a month? If not, are they OK with the less reliable free setup?
-11. Is there interest in reminders or QR cards later? (This affects whether you collect phone numbers carefully now.)
+Answered on 2026-11-27 (see the update at the top): plans and prices, grace period, monthly end date, cash vs GCash split, staff per floor, walk-ins by name.
+
+Still open:
+1. **Prices:** please confirm the six prices. They were given from memory.
+2. **"30 days":** does it mean the same date next month (25 Nov to 25 Dec, as built), or exactly 30 days?
+3. **Students:** does staff check a student ID before giving the student price? If so, should the system record it?
+4. **GCash:** is there one GCash number for the gym? Send the QR image from the GCash app (Receive > QR) to replace the demo one.
+5. **Moving off the notebook:** are you OK with members typing their own details on the desk phone for about a month (see the move-over plan above)? How many active members are there right now?
+6. **Desk devices:** what is on each floor's desk (phone, tablet, laptop)? Is the gym's Wi-Fi reliable on both floors?
+7. **NFC:** would you buy a USB reader (about PHP 1,500 to 3,000 **[GUESS]**) and cards or keyfobs (about PHP 15 to 50 each **[GUESS]**)? Who pays for a lost card?
+8. **Hosting and fee:** would you pay about PHP 1,200 a month for hosting and upkeep? This decides when the system goes online.
 
 ---
 
