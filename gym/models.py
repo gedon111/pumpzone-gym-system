@@ -190,8 +190,9 @@ class Membership(TimeStamped):
 
 # ---------------------------------------------------------------------------
 class Payment(TimeStamped):
-    CASH, GCASH, OTHER = "cash", "gcash", "other"
-    METHOD_CHOICES = [(CASH, "Cash"), (GCASH, "GCash"), (OTHER, "Other")]
+    # The gym takes cash and GCash only (owner, 2026-11-27).
+    CASH, GCASH = "cash", "gcash"
+    METHOD_CHOICES = [(CASH, "Cash"), (GCASH, "GCash")]
 
     # A payment is for a member's membership, OR a walk-in day pass (name only).
     membership = models.ForeignKey(

@@ -9,7 +9,7 @@ Columns (first row must be these headers, in any order):
     start_date     required, 2026-11-25 or 25/11/2026 (day first)
     end_date       optional, worked out from the plan if blank
     amount_paid    optional, 0 or blank = nothing paid yet
-    method         optional, cash (default), gcash or other
+    method         optional, cash (default) or gcash
     reference_no   optional, GCash reference
     notes          optional
 
@@ -35,7 +35,7 @@ from .models import Member, Membership, Payment, Plan
 REQUIRED = ["full_name", "plan_name", "start_date"]
 KNOWN = REQUIRED + ["nickname", "phone", "end_date", "amount_paid", "method", "reference_no", "notes"]
 DATE_FORMATS = ["%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"]
-METHODS = {"cash": Payment.CASH, "gcash": Payment.GCASH, "g-cash": Payment.GCASH, "other": Payment.OTHER}
+METHODS = {"cash": Payment.CASH, "gcash": Payment.GCASH, "g-cash": Payment.GCASH}
 
 
 @dataclass
@@ -148,7 +148,7 @@ def check_row(line, v, plans, errors):
         amount = Decimal("0")
     method = METHODS.get((v.get("method") or "cash").lower())
     if not method:
-        errors.append((line, f"method '{v.get('method')}' must be cash, gcash or other."))
+        errors.append((line, f"method '{v.get('method')}' must be cash or gcash."))
     if len(errors) > before:
         return None
     return Row(line, v["full_name"], v.get("nickname", ""), " ".join(v.get("phone", "").split()), plan, start, end,

@@ -1,0 +1,15 @@
+{% load pumpzone %}
+{# GCash QR. Hidden until "GCash" is ticked in the same form (CSS :has, no JavaScript). #}
+{# Optional: `due` = amount to show in big type. #}
+<div class="gcash-panel" aria-live="polite">
+  <div class="qr-frame">
+    {% gcash_qr as qr %}{{ qr.html }}
+    {% if qr.is_demo %}<span class="qr-stamp">Demo</span>{% endif %}
+  </div>
+  <div class="gcash-copy">
+    <span class="eyebrow mono">QR Ph · GCash</span>
+    {% if due %}<strong class="gcash-due">{{ due|peso }}</strong>{% endif %}
+    <p class="help">Turn the screen to the member. They scan it with GCash or any bank app and pay, then read you the reference number from their confirmation.</p>
+    {% if qr.is_demo %}<p class="help qr-warn">Demo code: it can't receive money. Add the gym's real QR before going live (see README).</p>{% endif %}
+  </div>
+</div>

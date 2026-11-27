@@ -5,6 +5,7 @@ Small helpers used inside templates. Load with {% load pumpzone %}.
     {{ "Marco Cruz"|initials }} -> MC
     {% icon "refresh" %}       -> an inline SVG line icon (same set as the mockup)
     {{ summary|sms_link }}     -> sms: link with a pre-filled reminder (see gym/sms.py)
+    {% gcash_qr as qr %}       -> qr.html (the QR) and qr.is_demo (see gym/qr.py)
 """
 
 from decimal import Decimal
@@ -13,6 +14,7 @@ from django import template
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
+from gym import qr
 from gym.sms import sms_link_for
 
 register = template.Library()
@@ -31,6 +33,12 @@ def peso(value):
 @register.filter
 def sms_link(summary):
     return sms_link_for(summary)
+
+
+@register.simple_tag
+def gcash_qr():
+    html, is_demo = qr.gcash_qr()
+    return {"html": html, "is_demo": is_demo}
 
 
 @register.filter

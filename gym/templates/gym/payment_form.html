@@ -14,7 +14,10 @@
   <form class="form" method="post" novalidate>
     {% csrf_token %}
     {{ form.non_field_errors }}
-    {% for f in form %}{% include "gym/_field.html" %}{% endfor %}
+    {% for f in form %}
+      {% include "gym/_field.html" %}
+      {% if f.name == "method" %}{% include "gym/_gcash_panel.html" with due=form.amount.value %}{% endif %}
+    {% endfor %}
     <button class="pz-btn pz-go pz-wide" type="submit">{% icon "check" %}Save payment</button>
   </form>
   {% endif %}

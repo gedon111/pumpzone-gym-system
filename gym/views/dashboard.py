@@ -107,8 +107,7 @@ def collected_today(today):
         rows = [p for p in payments if p.method == key]
         amount = sum((p.amount for p in rows), Decimal("0"))
         total += amount
-        if rows or key != Payment.OTHER:  # always show Cash and GCash
-            methods.append({"key": key, "label": label, "count": len(rows), "amount": amount})
+        methods.append({"key": key, "label": label, "count": len(rows), "amount": amount})
     for m in methods:
         m["share"] = round(m["amount"] / total * 100) if total else 0
     return {"total": total, "count": sum(m["count"] for m in methods), "methods": methods}

@@ -110,3 +110,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EXPIRING_WITHIN_DAYS = 7
 # Days after a membership starts before an unpaid balance counts as "late".
 GRACE_DAYS = int(os.environ.get("PUMPZONE_GRACE_DAYS", "3"))
+
+# The gym's real GCash / QR Ph code: save the image from the GCash app
+# (Receive > QR) and put its file path here. Blank = a DEMO QR that
+# cannot receive money. See gym/qr.py.
+GCASH_QR_IMAGE = os.environ.get("PUMPZONE_GCASH_QR_IMAGE", "")

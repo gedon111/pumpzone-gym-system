@@ -75,8 +75,13 @@ class ImportTests(TestCase):
         self.assertIn("Missing column", result.errors[0][1])
 
     def test_sample_file_is_valid(self):
-        Plan.objects.create(name="Student Monthly", price=Decimal("800"))
-        Plan.objects.create(name="3 Months", length=3, price=Decimal("2700"))
+        Plan.objects.create(name="Student Monthly", price=Decimal("650"))
+        Plan.objects.create(name="15 Days", length=15, unit="day", price=Decimal("450"))
+        Plan.objects.create(name="Student 15 Days", length=15, unit="day", price=Decimal("400"))
         result = read_csv("samples/sample_members.csv")
         self.assertTrue(result.ok, result.errors)
         self.assertEqual(len(result.rows), 8)
+
+    def test_method_other_is_rejected(self):
+        result = read_csv(self.csv("Ana Lim,,0900 000 0001,Monthly,2026-11-25,,1000,other,,\n"))
+        self.assertIn("must be cash or gcash", result.errors[0][1])
