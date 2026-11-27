@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}Sign-ups{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="stack tight">
+    <span class="eyebrow">Typed in by members on the desk phone</span>
+    <h1 class="page-title">Sign-ups</h1>
+  </div>
+  <div class="actions">
+    <form method="post" action="{% url 'kiosk_start' %}">{% csrf_token %}<button class="pz-btn pz-go" type="submit">{% icon "plus" %}Hand phone to a member</button></form>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="panel-head">
+    <div><h2 class="h2">Waiting for you</h2><span class="caption">Check the name and number with the person, then pick what to do.</span></div>
+    <span class="mono muted">{{ pending|length }}</span>
+  </div>
+  {% for s in pending %}
+  <div class="pz-row">
+    <span class="initials" aria-hidden="true">{{ s.full_name|initials }}</span>
+    <div class="row-who">
+      <a class="row-name" href="{% url 'signup_review' s.pk %}">{{ s.full_name }}{% if s.nickname %} <span class="muted">“{{ s.nickname }}”</span>{% endif %}</a>
+      <span class="row-meta">{{ s.phone }} · {{ s.created_at|timesince }} ago</span>
+    </div>
+    <div class="row-chip">
+      <span class="pz-chip {% if s.says_existing %}k-expiring{% else %}k-active{% endif %}">{% if s.says_existing %}Says: in the notebook{% else %}New{% endif %}</span>
+    </div>
+    <div class="row-actions"><a class="pz-btn pz-go pz-small" href="{% url 'signup_review' s.pk %}">Check</a></div>
+  </div>
+  {% empty %}
+  <p class="panel-pad caption">Nothing waiting. Tap "Hand phone to a member" when someone new walks in.</p>
+  {% endfor %}
+</section>
+
+{% if recent %}
+<section class="panel">
+  <div class="panel-head"><h2 class="h3">Recently handled</h2></div>
+  <div class="scroll-x">
+    <table class="pz-t compact">
+      <thead><tr><th>Typed in</th><th>Name</th><th>Result</th><th>By</th></tr></thead>
+      <tbody>
+      {% for s in recent %}
+        <tr><td class="n">{{ s.created_at|date:"j M H:i" }}</td>
+            <td>{% if s.member %}<a href="{% url 'member_detail' s.member_id %}">{{ s.full_name }}</a>{% else %}{{ s.full_name }}{% endif %}</td>
+            <td>{{ s.get_status_display }}</td>
+            <td>{% if s.handled_by %}{{ s.handled_by.first_name|default:s.handled_by.username }}{% else %}–{% endif %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -5,6 +5,8 @@ Database tables. Each class below becomes one table.
     Member      a person on file
     Membership  one paid period for a member (one row per renewal)
     Payment     money received, cash or GCash. Never deleted, only voided.
+    SignUp      details a person typed in themselves on the desk phone,
+                waiting for staff to check them (see views/signups.py)
 
 Status (active / expiring / expired) is never stored. It is worked out
 from dates each time, so it can never be out of date. See status.py.
@@ -241,3 +243,54 @@ class Payment(TimeStamped):
     @property
     def is_walk_in(self):
         return self.membership_id is None
+
+
+# ---------------------------------------------------------------------------
+class SignUp(TimeStamped):
+    """
+    Details a member typed in themselves (sign-up mode on the desk phone).
+    Nothing here is trusted until staff check it and turn it into a Member.
+    """
+
+    PENDING, DONE, DISMISSED = "pending", "done", "dismissed"
+    STATUS_CHOICES = [(PENDING, "Waiting for staff"), (DONE, "Done"), (DISMISSED, "Dismissed")]
+
+    full_name = models.CharField(max_length=120)
+    nickname = models.CharField(max_length=60, blank=True)
+    phone = models.CharField(max_length=20)
+    birth_date = models.DateField(null=True, blank=True)
+    emergency_contact_name = models.CharField(max_length=120, blank=True)
+    emergency_contact_phone = models.CharField(max_length=20, blank=True)
+    says_existing = models.BooleanField(default=False, help_text="They said they are already a member (notebook).")
+    consent_given_on = models.DateField(default=today)
+
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
+    member = models.ForeignKey(Member, on_delete=models.PROTECT, null=True, blank=True, related_name="sign_ups")
+    entered_on = models.ForeignKey(  # whose desk phone it was typed on
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, editable=False, related_name="+"
+    )
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, editable=False, related_name="+"
+    )
+    handled_at = models.DateTimeField(null=True, blank=True, editable=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.full_name} ({self.get_status_display()})"
+
+    def member_fields(self):
+        """The typed details, ready to create or update a Member."""
+        return {
+            "full_name": self.full_name, "nickname": self.nickname, "phone": self.phone,
+            "birth_date": self.birth_date, "emergency_contact_name": self.emergency_contact_name,
+            "emergency_contact_phone": self.emergency_contact_phone, "consent_given_on": self.consent_given_on,
+        }
+
+    def close(self, status, user, member=None):
+        self.status = status
+        self.member = member
+        self.handled_by = user
+        self.handled_at = timezone.now()
+        self.save()

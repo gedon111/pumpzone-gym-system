@@ -9,7 +9,7 @@ the date picker, inputmode=decimal opens the number keyboard for money.
 from django import forms
 from django.utils import timezone
 
-from .models import Member, Membership, Payment, Plan
+from .models import Member, Membership, Payment, Plan, SignUp
 from .services import PAY_FULL, PAY_LATER, PAY_PARTIAL
 
 DATE = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
@@ -165,4 +165,77 @@ class WalkInForm(forms.Form):
             self.add_error("reference_no", "GCash payments need the reference number.")
         if data.get("day_pass") and not data.get("amount"):
             data["amount"] = data["day_pass"].price  # blank = the pass price
+        return data
+
+
+# ---------------------------------------------------------------------------
+# Sign-up mode (the member types on the desk phone) and the staff check.
+
+PRIVACY_NOTICE = (
+    "Pumpzone keeps your name, phone number and birth date only to run your membership "
+    "and send you reminders. Only gym staff can see them. We never share or sell them. "
+    "You can ask to see, correct or delete your details at the front desk."
+)
+
+
+class SignUpForm(forms.ModelForm):
+    """What the member fills in themselves. Big, simple, nothing about other members."""
+
+    says_existing = forms.TypedChoiceField(
+        label="Are you already a member?", widget=forms.RadioSelect, coerce=lambda v: v == "yes", initial="no",
+        choices=[("no", "No, I'm new"), ("yes", "Yes, I'm in the notebook")],
+    )
+    consent = forms.BooleanField(label="I agree to the privacy notice above.")
+
+    class Meta:
+        model = SignUp
+        fields = ["full_name", "nickname", "phone", "birth_date", "emergency_contact_name", "emergency_contact_phone",
+                  "says_existing"]
+        labels = {"full_name": "Full name", "nickname": "Nickname (what we call you)", "phone": "Mobile number",
+                  "emergency_contact_name": "Emergency contact name", "emergency_contact_phone": "Emergency contact number"}
+        help_texts = {"phone": "For membership reminders only.", "birth_date": "Optional."}
+        widgets = {"phone": PHONE, "emergency_contact_phone": PHONE, "birth_date": DATE,
+                   "full_name": forms.TextInput(attrs={"autocomplete": "off", "autocapitalize": "words"}),
+                   "nickname": forms.TextInput(attrs={"autocomplete": "off"})}
+
+    def clean_phone(self):
+        # Tidy the spacing only. Whether the number is already on file is
+        # NEVER said here: that would let anyone check other people's numbers.
+        phone = " ".join(self.cleaned_data["phone"].split())
+        if len("".join(ch for ch in phone if ch.isdigit())) < 7:
+            raise forms.ValidationError("Please type your full mobile number.")
+        return phone
+
+
+class UnlockForm(forms.Form):
+    """A staff member ends sign-up mode with their own password."""
+
+    username = forms.CharField(widget=forms.TextInput(attrs={"autocomplete": "off", "autocapitalize": "none"}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={"autocomplete": "off"}))
+
+
+class CarryOverForm(forms.Form):
+    """A member already paid in the notebook: copy their current period in."""
+
+    plan = forms.ModelChoiceField(queryset=Plan.objects.none(), empty_label=None)
+    start_date = forms.DateField(label="Start date (from the notebook)", widget=DATE)
+    end_date = forms.DateField(label="Last day", required=False, widget=DATE,
+                               help_text="Only if the notebook says a different last day.")
+    amount_paid = forms.DecimalField(label="Amount paid (from the notebook)", min_value=0, widget=MONEY,
+                                     help_text="0 if they still owe the whole amount.")
+    method = forms.ChoiceField(widget=forms.RadioSelect, choices=Payment.METHOD_CHOICES, initial=Payment.CASH)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["plan"].queryset = active_plans()
+        self.fields["plan"].label_from_instance = lambda p: f"{p.name} · ₱{p.price:,.0f}"
+
+    def clean(self):
+        data = super().clean()
+        start, end = data.get("start_date"), data.get("end_date")
+        if start and start >= timezone.localdate():
+            self.add_error("start_date", "A notebook period started before today. If they pay today, "
+                                         "use New member so the money counts in today's drawer.")
+        if start and end and end < start:
+            self.add_error("end_date", "The last day is before the start date.")
         return data

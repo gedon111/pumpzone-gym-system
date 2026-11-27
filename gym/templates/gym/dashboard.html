@@ -2,6 +2,12 @@
 {% load pumpzone %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+{% if pending_signups %}
+<div class="flash signup-bar" role="status">
+  <span><strong>{{ pending_signups }} new sign-up{{ pending_signups|pluralize }}</strong> waiting for you to check.</span>
+  <a class="pz-btn pz-go pz-small" href="{% url 'signup_list' %}">Check now</a>
+</div>
+{% endif %}
 
 {# ---- Hero: headline + every member as a square ---- #}
 <section class="pz-hero" aria-labelledby="pz-headline">

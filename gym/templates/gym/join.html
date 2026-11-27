@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{# Sign-up mode: the member fills this in on the desk phone. No menu, no other members' data. #}
+{% block title %}Join Pumpzone{% endblock %}
+{% block page %}
+<div class="kiosk">
+  <section class="pz-hero kiosk-card" aria-labelledby="join-title">
+    {% include "gym/_kiosk_top.html" %}
+    <div class="login-copy">
+      <span class="brand-name">PUMPZONE</span>
+      <h1 id="join-title" class="hero-title">Welcome! Tell us about you.</h1>
+      <p class="hero-text">Takes about a minute. Staff will check it with you after.</p>
+    </div>
+
+    <form class="form glass" method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {% include "gym/_field.html" with f=form.full_name %}
+      <div class="form-grid">
+        {% include "gym/_field.html" with f=form.nickname %}
+        {% include "gym/_field.html" with f=form.phone %}
+      </div>
+      {% include "gym/_field.html" with f=form.birth_date %}
+      <div class="form-grid">
+        {% include "gym/_field.html" with f=form.emergency_contact_name %}
+        {% include "gym/_field.html" with f=form.emergency_contact_phone %}
+      </div>
+      {% include "gym/_field.html" with f=form.says_existing %}
+      <div class="form-section">
+        <p class="notice"><strong>Privacy notice.</strong> {{ privacy_notice }}</p>
+        {% include "gym/_field.html" with f=form.consent %}
+      </div>
+      <button class="pz-btn pz-go pz-wide" type="submit">{% icon "check" %}Send to the front desk</button>
+    </form>
+    <a class="kiosk-staff" href="{% url 'join_unlock' %}">Staff only</a>
+  </section>
+</div>
+{% endblock %}

@@ -4,9 +4,11 @@ create memberships or payments themselves. Each action is all-or-nothing
 (transaction.atomic): if anything fails, nothing is saved.
 """
 
+from datetime import datetime, time
 from decimal import Decimal
 
 from django.db import transaction
+from django.utils import timezone
 
 from .models import Member, Membership, Payment
 
@@ -41,12 +43,38 @@ def add_member(*, member_fields, user, **sale):
     return member
 
 
-def record_payment(*, amount, method, user, membership=None, walk_in_name="", walk_in_plan=None, reference_no=""):
+def record_payment(*, amount, method, user, membership=None, walk_in_name="", walk_in_plan=None,
+                   reference_no="", paid_on=None):
     """Money received. Checked by Payment.clean() (GCash ref, amount > 0)."""
     payment = Payment(
         membership=membership, walk_in_name=walk_in_name, walk_in_plan=walk_in_plan, amount=Decimal(amount),
         method=method, reference_no=reference_no.strip(), received_by=user,
+        paid_on=paid_on or timezone.now(),
     )
     payment.full_clean()
     payment.save()
     return payment
+
+
+NOTEBOOK_REF = "from notebook"
+
+
+@transaction.atomic
+def carry_over_membership(*, member, plan, start_date, amount_paid, method, user, end_date=None):
+    """
+    A period the member already paid for in the paper notebook.
+
+    The payment is dated at noon on the notebook start date, so it does
+    NOT count in today's drawer. It has no "received by" (nobody in the
+    system took it) and its reference says "from notebook".
+    """
+    membership = Membership.objects.create(
+        member=member, plan=plan, start_date=start_date, end_date=end_date,
+        price_agreed=plan.price, created_by=user,
+    )
+    if amount_paid and amount_paid > 0:
+        record_payment(
+            membership=membership, amount=amount_paid, method=method, user=None, reference_no=NOTEBOOK_REF,
+            paid_on=timezone.make_aware(datetime.combine(start_date, time(12, 0))),
+        )
+    return membership

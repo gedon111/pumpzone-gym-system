@@ -10,7 +10,7 @@ Rules enforced here:
 
 from django.contrib import admin
 
-from .models import Member, Membership, Payment, Plan
+from .models import Member, Membership, Payment, Plan, SignUp
 from .roles import is_owner
 
 LOCKED_PAYMENT_FIELDS = ("membership", "walk_in_name", "walk_in_plan", "amount", "method", "reference_no", "paid_on")
@@ -95,3 +95,18 @@ class PaymentAdmin(admin.ModelAdmin):
         if not obj.pk:
             obj.received_by = request.user
         super().save_model(request, obj, form, change)
+
+
+@admin.register(SignUp)
+class SignUpAdmin(admin.ModelAdmin):
+    """Read-only record of what members typed in themselves. Staff handle them on the Sign-ups screen."""
+
+    list_display = ("created_at", "full_name", "phone", "says_existing", "status", "member", "handled_by")
+    list_filter = ("status", "says_existing")
+    search_fields = ("full_name", "nickname", "phone")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

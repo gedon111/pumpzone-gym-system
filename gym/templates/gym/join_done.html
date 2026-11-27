@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}Thank you{% endblock %}
+{% block page %}
+<div class="kiosk">
+  <section class="pz-hero kiosk-card" aria-labelledby="done-title">
+    {% include "gym/_kiosk_top.html" %}
+    <div class="login-copy">
+      <span class="done-tick" aria-hidden="true">{% icon "check" 34 %}</span>
+      <span class="brand-name">PUMPZONE</span>
+      <h1 id="done-title" class="hero-title">Salamat! You're all set.</h1>
+      <p class="hero-text">Please hand the phone back to the front desk. They'll confirm your plan and payment.</p>
+    </div>
+    <div class="actions">
+      <a class="pz-btn pz-go" href="{% url 'join' %}">{% icon "plus" %}Next person</a>
+      <a class="pz-btn pz-ghost" href="{% url 'join_unlock' %}">Staff: unlock</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

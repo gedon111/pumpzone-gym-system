@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Staff unlock{% endblock %}
+{% block page %}
+<div class="login">
+  <section class="pz-hero" aria-labelledby="unlock-title">
+    {% include "gym/_kiosk_top.html" %}
+    <div class="login-copy">
+      <span class="brand-name">PUMPZONE</span>
+      <h1 id="unlock-title" class="hero-title">Staff unlock</h1>
+      <p class="hero-text">Type your own username and password to leave sign-up mode.</p>
+    </div>
+    {% if paused %}
+      <div class="flash error" role="alert">Too many wrong tries. Wait 5 minutes, then try again.</div>
+    {% else %}
+    <form class="form glass" method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="flash error" role="alert">{{ form.non_field_errors.0 }}</div>{% endif %}
+      {% include "gym/_field.html" with f=form.username %}
+      {% include "gym/_field.html" with f=form.password %}
+      <button class="pz-btn pz-go pz-wide" type="submit">Unlock</button>
+    </form>
+    {% endif %}
+    <a class="kiosk-staff" href="{% url 'join' %}">← Back to the sign-up form</a>
+  </section>
+</div>
+{% endblock %}

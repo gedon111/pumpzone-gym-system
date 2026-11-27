@@ -24,6 +24,7 @@
       <a href="{% url 'dashboard' %}" {% if here == 'dashboard' %}class="on" aria-current="page"{% endif %}>Dashboard</a>
       <a href="{% url 'member_list' %}" {% if here == 'member_list' or here == 'member_detail' %}class="on" aria-current="page"{% endif %}>Members</a>
       <a href="{% url 'payment_list' %}" {% if here == 'payment_list' %}class="on" aria-current="page"{% endif %}>Payments</a>
+      <a href="{% url 'signup_list' %}" {% if here == 'signup_list' or here == 'signup_review' %}class="on" aria-current="page"{% endif %}>Sign-ups{% if pending_signups %} <span class="nav-count mono">{{ pending_signups }}</span>{% endif %}</a>
       {% if request.user.is_staff %}<a href="{% url 'admin:index' %}">Admin</a>{% endif %}
       {% endwith %}
     </nav>
@@ -33,6 +34,7 @@
       <input id="pz-search" class="pz-input" type="search" name="q" value="{{ request.GET.q }}" placeholder="Search name, nickname, phone or code">
     </form>
     <div class="who">
+      <form method="post" action="{% url 'kiosk_start' %}">{% csrf_token %}<button class="pz-btn pz-ghost pz-small" type="submit" title="Hand this phone to a member so they can type in their own details">{% icon "plus" %}Member sign-up</button></form>
       {% if settings_debug %}<span class="badge-sample" title="DEBUG is on. Use only fake data.">Sample data</span>{% endif %}
       <span class="avatar" title="Signed in as {{ request.user.get_full_name|default:request.user.username }}">{{ request.user.get_full_name|default:request.user.username|slice:":2" }}</span>
       <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="pz-btn pz-ghost pz-small" type="submit">Sign out</button></form>

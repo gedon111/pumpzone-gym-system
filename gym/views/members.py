@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from .. import dates, status
 from ..forms import AddMemberForm, EditMemberForm, RenewForm
-from ..models import Member
+from ..models import Member, SignUp
 from ..services import add_member, sell_membership
 from ..summary import summarize, summarize_all, urgency
 from ..templatetags.pumpzone import peso
@@ -56,14 +56,29 @@ def member_detail(request, pk):
 
 
 def member_add(request):
-    """New member + first membership + payment, on one screen."""
-    form = AddMemberForm(request.POST or None)
+    """
+    New member + first membership + payment, on one screen.
+    With ?signup=<id>, the form starts filled in from a member's own sign-up.
+    """
+    sign_up = SignUp.objects.filter(pk=request.GET.get("signup") or 0, status=SignUp.PENDING).first()
+    initial = {}
+    if sign_up:
+        initial = {k: v for k, v in sign_up.member_fields().items() if k != "consent_given_on"}
+        initial["consent"] = True  # they ticked the privacy notice themselves
+    form = AddMemberForm(request.POST or None, initial=initial)
     if request.method == "POST" and form.is_valid():
-        member = add_member(member_fields=form.member_fields(), user=request.user,
-                            **form.plan_values(), **form.sale_values())
+        fields = form.member_fields()
+        if sign_up:
+            fields["emergency_contact_name"] = sign_up.emergency_contact_name
+            fields["emergency_contact_phone"] = sign_up.emergency_contact_phone
+        member = add_member(member_fields=fields, user=request.user, **form.plan_values(), **form.sale_values())
+        if sign_up:
+            sign_up.close(SignUp.DONE, request.user, member)
         messages.success(request, f"Added {member.full_name} as {member.member_code}. {paid_text(member)}")
         return redirect("member_detail", pk=member.pk)
-    return render(request, "gym/member_form.html", {"form": form, "title": "Add member", "submit": "Add member"})
+    return render(request, "gym/member_form.html", {
+        "form": form, "title": "Add member", "submit": "Add member", "sign_up": sign_up,
+    })
 
 
 def member_edit(request, pk):

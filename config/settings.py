@@ -49,6 +49,9 @@ MIDDLEWARE = [
     # Every page needs a login unless a view is explicitly marked public.
     # This is safer than remembering to protect each page one by one.
     "django.contrib.auth.middleware.LoginRequiredMiddleware",
+    # Sign-up mode: while a member holds the desk phone, only the sign-up
+    # form opens. See gym/kiosk.py.
+    "gym.kiosk.KioskLockMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

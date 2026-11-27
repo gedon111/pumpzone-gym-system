@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load pumpzone %}
+{% block title %}Check sign-up: {{ sign_up.full_name }}{% endblock %}
+{% block content %}
+<section class="panel panel-pad narrow center">
+  <a class="back" href="{% url 'signup_list' %}">← Sign-ups</a>
+  <div>
+    <span class="eyebrow">Typed in {{ sign_up.created_at|date:"j M, H:i" }} · {{ sign_up.get_status_display }}</span>
+    <h1 class="page-title">{{ sign_up.full_name }}</h1>
+  </div>
+  <div class="facts">
+    <div class="fact"><span class="eyebrow">Nickname</span><strong>{{ sign_up.nickname|default:"–" }}</strong></div>
+    <div class="fact"><span class="eyebrow">Mobile</span><span class="mono">{{ sign_up.phone }}</span></div>
+    <div class="fact"><span class="eyebrow">Birth date</span><span class="mono">{{ sign_up.birth_date|date:"j M Y"|default:"–" }}</span></div>
+    <div class="fact"><span class="eyebrow">Emergency contact</span><strong>{{ sign_up.emergency_contact_name|default:"–" }}</strong><span class="mono">{{ sign_up.emergency_contact_phone }}</span></div>
+    <div class="fact"><span class="eyebrow">They said</span><strong>{% if sign_up.says_existing %}Already a member (notebook){% else %}New member{% endif %}</strong></div>
+    <div class="fact"><span class="eyebrow">Privacy notice</span><strong>Agreed {{ sign_up.consent_given_on|date:"j M Y" }}</strong></div>
+  </div>
+
+  {% if sign_up.status != "pending" %}
+    <p class="caption">Handled by {% if sign_up.handled_by %}{{ sign_up.handled_by.first_name|default:sign_up.handled_by.username }}{% else %}–{% endif %} on {{ sign_up.handled_at|date:"j M Y, H:i" }}.
+    {% if sign_up.member %}<a href="{% url 'member_detail' sign_up.member_id %}">Open {{ sign_up.member.full_name }}</a>{% endif %}</p>
+  {% else %}
+
+  {# ---- 1. Already on file? ---- #}
+  {% if matches %}
+  <div class="form-section">
+    <h2 class="h3">Already on file?</h2>
+    <p class="caption">These members have the same phone or name. If it's the same person, update them instead of adding a new one.</p>
+    {% for m in matches %}
+    <form class="match" method="post" action="{% url 'signup_link' sign_up.pk m.member.pk %}">
+      {% csrf_token %}
+      <div class="row-who">
+        <span class="row-name">{{ m.member.full_name }}</span>
+        <span class="row-meta">{{ m.member.member_code }} · {{ m.member.phone|default:"no phone" }} · {{ m.why }}</span>
+      </div>
+      <button class="pz-btn pz-ghost pz-small" type="submit">Same person: update details</button>
+    </form>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ---- 2. New member ---- #}
+  <div class="form-section">
+    <h2 class="h3">New member</h2>
+    <p class="caption">Opens Add member with their details filled in. Pick the plan and take payment as usual.</p>
+    <a class="pz-btn pz-go" href="{% url 'member_add' %}?signup={{ sign_up.pk }}">{% icon "plus" %}Add as new member</a>
+  </div>
+
+  {# ---- 3. Notebook member ---- #}
+  <div class="form-section">
+    <h2 class="h3">Notebook member</h2>
+    <p class="caption">They already paid in the paper notebook. Copy their current period from it. The payment is dated on the notebook start date, so it won't count in today's drawer.</p>
+    <form class="form" method="post" action="{% url 'signup_carry_over' sign_up.pk %}" novalidate>
+      {% csrf_token %}
+      {{ carry_form.non_field_errors }}
+      <div class="form-grid">
+        {% include "gym/_field.html" with f=carry_form.plan %}
+        {% include "gym/_field.html" with f=carry_form.start_date %}
+        {% include "gym/_field.html" with f=carry_form.end_date %}
+        {% include "gym/_field.html" with f=carry_form.amount_paid %}
+      </div>
+      {% include "gym/_field.html" with f=carry_form.method %}
+      <button class="pz-btn pz-go pz-wide" type="submit">{% icon "check" %}Add with notebook period</button>
+    </form>
+  </div>
+
+  {# ---- 4. Dismiss ---- #}
+  <form class="form-section" method="post" action="{% url 'signup_dismiss' sign_up.pk %}">
+    {% csrf_token %}
+    <p class="caption">Spam, a test, or the same person twice? Dismiss it. It stays in the list with your name.</p>
+    <div><button class="pz-btn pz-ghost pz-small" type="submit">{% icon "x-circle" %}Dismiss</button></div>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

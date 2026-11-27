@@ -5,6 +5,7 @@
 <section class="panel panel-pad narrow center">
   <a class="back" href="{% if member %}{% url 'member_detail' member.pk %}{% else %}{% url 'member_list' %}{% endif %}">← Back</a>
   <h1 class="page-title">{{ title }}</h1>
+  {% if sign_up %}<p class="caption">Filled in from {{ sign_up.full_name }}'s own sign-up. Check it with them, then pick the plan and payment.</p>{% endif %}
   <form class="form" method="post" novalidate>
     {% csrf_token %}
     {{ form.non_field_errors }}

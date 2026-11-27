@@ -309,6 +309,20 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-copy { display: flex; flex-direction: column; gap: 10px; }
 .login .hero-title { font-size: clamp(30px, 8vw, 40px); }
 
+/* 14b. Sign-up mode (member holds the desk phone) and the staff check */
+.kiosk { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+.kiosk-card { width: min(640px, 100%); min-height: 0; flex-direction: column; align-items: stretch; gap: 24px; padding: 32px; }
+.kiosk .hero-title { font-size: clamp(30px, 7vw, 44px); }
+.kiosk-staff { align-self: center; font-size: 12.5px; color: var(--ink-3); position: relative; }
+.done-tick { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%;
+  background: var(--go); color: var(--go-ink); box-shadow: 0 0 0 8px rgba(123, 224, 165, .14); }
+.notice { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
+.match { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px;
+  border-radius: 10px; background: var(--raised-2); }
+.nav-count { margin-left: 6px; min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--go); color: var(--go-ink);
+  font-size: 11px; font-weight: 700; text-align: center; }
+.signup-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+
 /* 15. Small screens (front-desk phone) -------------------------------------- */
 @media (max-width: 640px) {
   .wrap { padding: 0 14px 48px; gap: 18px; }
@@ -326,6 +340,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
   .row-actions { width: 100%; }
   .row-actions .pz-btn { flex: 1 1 0; }
   .big-money { font-size: 40px; }
+  .kiosk-card { padding: 24px 18px; }
   .gcash-panel { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .qr-frame { width: min(220px, 70vw); }
 }
